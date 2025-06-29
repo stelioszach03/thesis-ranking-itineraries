@@ -1,0 +1,215 @@
+% Chapter 4: Implementation
+
+\section{System Architecture}
+
+Our implementation follows a modular architecture enabling algorithm experimentation while maintaining production readiness.
+
+\subsection{Core Components}
+\begin{itemize}
+    \item \texttt{metrics\_definitions.py}: POI, Itinerary, and CSS calculations
+    \item \texttt{greedy\_algorithms.py}: Greedy and HeapGreedy implementations
+    \item \texttt{astar\_itinerary.py}: A* with admissible heuristics
+    \item \texttt{lpa\_star.py}: Dynamic replanning with LPA*
+    \item \texttt{hybrid\_planner.py}: Orchestration and algorithm selection
+\end{itemize}
+
+\subsection{Data Pipeline}
+\texttt{prepare\_nyc\_data.py} generates the 10,847 POI dataset:
+\begin{lstlisting}[language=Python]
+POI_CATEGORIES = {
+    'museum': 1200,      # ~11% of POIs
+    'park': 800,         # ~7% of POIs  
+    'restaurant': 3500,  # ~32% of POIs
+    'landmark': 1500,    # ~14% of POIs
+    'shopping': 1800,    # ~17% of POIs
+    'entertainment': 900, # ~8% of POIs
+    'cultural': 700,     # ~6% of POIs
+    'market': 447        # ~4% of POIs
+}
+\end{lstlisting}
+
+\section{Algorithm Implementations}
+
+\subsection{Greedy with Marginal Utility}
+Key optimization using NumPy vectorization:
+\begin{lstlisting}[language=Python]
+@numba.jit(nopython=True)
+def calculate_marginal_utility(poi_features, selected_features, 
+                              preferences, current_time):
+    base_utility = np.dot(poi_features, preferences)
+    time_penalty = max(0, 1 - current_time / 480)  # 8 hours
+    diversity_bonus = 1 - cosine_similarity(poi_features, 
+                                           selected_features.mean(axis=0))
+    return base_utility * time_penalty * (1 + 0.2 * diversity_bonus)
+\end{lstlisting}
+
+\subsection{A* Search Implementation}
+State representation and heuristic:
+\begin{lstlisting}[language=Python]
+@dataclass
+class SearchNode:
+    state: ItineraryState
+    g_cost: float  # Cost to reach this state
+    h_cost: float  # Heuristic estimate to goal
+    parent: Optional['SearchNode'] = None
+    
+    @property
+    def f_cost(self):
+        return self.g_cost + self.h_cost
+
+def compute_heuristic(state, remaining_pois, distance_matrix):
+    if not remaining_pois:
+        return 0
+    # MST-based admissible heuristic
+    mst_cost = minimum_spanning_tree_cost(remaining_pois, distance_matrix)
+    min_connection = min(distance_matrix[state.current_poi][p] 
+                        for p in remaining_pois)
+    return (mst_cost + min_connection) * TIME_PER_KM
+\end{lstlisting}
+
+\subsection{LPA* Dynamic Updates}
+Efficient replanning through local updates:
+\begin{lstlisting}[language=Python]
+def update_vertex(self, state):
+    if state != self.start:
+        # Recompute rhs value
+        self.rhs[state] = min(self.g[pred] + cost(pred, state)
+                             for pred in self.predecessors[state])
+    
+    # Remove from queue if present
+    if state in self.queue:
+        self.queue.remove(state)
+    
+    # Re-insert if inconsistent
+    if self.g[state] != self.rhs[state]:
+        key = self.calculate_key(state)
+        self.queue.insert(state, key)
+\end{lstlisting}
+
+\section{Performance Optimizations}
+
+\subsection{Spatial Indexing}
+R-tree construction for efficient spatial queries:
+\begin{lstlisting}[language=Python]
+def build_rtree_index(pois):
+    idx = index.Index()
+    for i, poi in enumerate(pois):
+        idx.insert(i, (poi.lon, poi.lat, poi.lon, poi.lat))
+    return idx
+
+def find_nearby_pois(rtree_idx, center, radius_km):
+    # Convert km to degrees (approximate)
+    radius_deg = radius_km / 111.32
+    bounds = (center.lon - radius_deg, center.lat - radius_deg,
+              center.lon + radius_deg, center.lat + radius_deg)
+    return list(rtree_idx.intersection(bounds))
+\end{lstlisting}
+
+\subsection{Distance Matrix Precomputation}
+Vectorized Manhattan distance calculation:
+\begin{lstlisting}[language=Python]
+@numba.jit(nopython=True, parallel=True)
+def compute_distance_matrix_numba(lats, lons):
+    n = len(lats)
+    distances = np.zeros((n, n))
+    for i in numba.prange(n):
+        for j in range(i+1, n):
+            # Manhattan distance with NYC correction factor
+            dist = 1.4 * (abs(lats[i] - lats[j]) + 
+                         abs(lons[i] - lons[j])) * 111.32
+            distances[i, j] = dist
+            distances[j, i] = dist
+    return distances
+\end{lstlisting}
+
+\section{Web Interface}
+
+\subsection{Flask Application}
+RESTful API with session management:
+\begin{lstlisting}[language=Python]
+@app.route('/api/plan', methods=['POST'])
+def plan_itinerary():
+    data = request.json
+    preferences = data.get('preferences', {})
+    constraints = Constraints(**data.get('constraints', {}))
+    
+    # Algorithm selection
+    planner = HybridItineraryPlanner(pois, distance_matrix)
+    result = planner.plan(preferences, constraints)
+    
+    # Cache for dynamic updates
+    session['plan_id'] = result.session_id
+    session_cache[result.session_id] = planner
+    
+    return jsonify({
+        'success': True,
+        'itinerary': result.itinerary.to_dict(),
+        'metrics': result.metrics,
+        'runtime': result.runtime_ms
+    })
+\end{lstlisting}
+
+\subsection{Real-time Updates}
+WebSocket integration for dynamic events:
+\begin{lstlisting}[language=Python]
+@socketio.on('dynamic_update')
+def handle_update(data):
+    plan_id = session.get('plan_id')
+    planner = session_cache.get(plan_id)
+    
+    if data['type'] == 'subway_disruption':
+        affected_pois = find_pois_near_stations(data['stations'])
+        update = DynamicUpdate(
+            type=UpdateType.TRANSIT,
+            affected_pois=affected_pois
+        )
+        
+    new_plan = planner.replan(update)
+    emit('itinerary_updated', {
+        'itinerary': new_plan.to_dict(),
+        'computation_reuse': planner.get_reuse_percentage()
+    })
+\end{lstlisting}
+
+\section{Testing Framework}
+
+Comprehensive test coverage ensuring correctness:
+\begin{lstlisting}[language=Python]
+class TestHybridPlanner(unittest.TestCase):
+    def test_algorithm_selection(self):
+        """Verify correct algorithm chosen for problem size"""
+        small_pois = generate_test_pois(50)
+        large_pois = generate_test_pois(5000)
+        
+        planner_small = HybridPlanner(small_pois)
+        planner_large = HybridPlanner(large_pois)
+        
+        self.assertEqual(planner_small.select_algorithm(), 
+                        AlgorithmType.ASTAR)
+        self.assertEqual(planner_large.select_algorithm(), 
+                        AlgorithmType.HEAP_GREEDY)
+\end{lstlisting}
+
+\section{Deployment Configuration}
+
+Production setup with monitoring:
+\begin{lstlisting}[language=Python]
+# Gunicorn configuration
+bind = "0.0.0.0:8000"
+workers = 4
+worker_class = "gevent"
+timeout = 30
+
+# OpenTelemetry instrumentation
+from opentelemetry import trace
+tracer = trace.get_tracer(__name__)
+
+@tracer.start_as_current_span("plan_itinerary")
+def plan_with_tracing(preferences, constraints):
+    # Planning logic with automatic tracing
+    pass
+\end{lstlisting}
+
+\section{Summary}
+
+The implementation successfully translates our algorithmic contributions into a production-ready system. Key achievements include sub-second planning for typical queries, 70-90\% computation reuse for dynamic updates, and horizontal scalability through stateless design. The next chapter presents comprehensive evaluation results demonstrating these capabilities.

@@ -1,0 +1,370 @@
+/* 
+ * NYC Itinerary Ranking Demo - Custom Styles
+ * Bachelor's Thesis - NKUA
+ */
+
+/* Base Styles */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f8f9fa;
+}
+
+/* Metric Cards */
+.metric-card {
+    background: white;
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    transition: transform 0.2s;
+    text-align: center;
+}
+
+.metric-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+
+.metric-card h6 {
+    color: #6c757d;
+    font-size: 0.9rem;
+    margin-bottom: 10px;
+}
+
+.metric-value {
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: #0d6efd;
+}
+
+.primary-metric .metric-value {
+    color: #28a745;
+    font-size: 3rem;
+}
+
+/* CSS Score Styling */
+.css-score {
+    font-size: 48px;
+    font-weight: bold;
+    color: #28a745;
+}
+
+.runtime-display {
+    font-size: 24px;
+    color: #17a2b8;
+}
+
+/* Timeline Styles */
+.itinerary-timeline {
+    position: relative;
+}
+
+.timeline-item {
+    display: flex;
+    margin-bottom: 20px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    padding: 10px;
+    border-radius: 5px;
+}
+
+.timeline-item:hover {
+    background-color: #f0f0f0;
+}
+
+.timeline-time {
+    font-weight: bold;
+    color: #0d6efd;
+    min-width: 60px;
+    margin-right: 15px;
+}
+
+.timeline-content {
+    flex: 1;
+    padding-left: 20px;
+    border-left: 3px solid #0d6efd;
+}
+
+.timeline-content h6 {
+    margin-bottom: 5px;
+    color: #333;
+}
+
+.poi-details {
+    margin-top: 5px;
+}
+
+.poi-details .badge {
+    margin-right: 5px;
+}
+
+/* POI Timeline (Alternative Style) */
+.poi-timeline {
+    border-left: 3px solid #007bff;
+    padding-left: 20px;
+    margin-left: 10px;
+}
+
+.poi-item {
+    margin: 20px 0;
+    position: relative;
+}
+
+.poi-item::before {
+    content: '';
+    position: absolute;
+    left: -25px;
+    top: 5px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: #007bff;
+}
+
+/* Algorithm Selector */
+.algorithm-selector {
+    background: #e9ecef;
+    padding: 20px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+}
+
+/* Preference Sliders */
+.preference-slider {
+    margin: 15px 0;
+}
+
+.preference-slider label {
+    font-weight: 500;
+    display: block;
+    margin-bottom: 5px;
+}
+
+.form-range {
+    cursor: pointer;
+}
+
+/* Map Container */
+#map, #resultMap {
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+
+/* Update Notification */
+.update-notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1000;
+    max-width: 400px;
+    animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+    }
+    to {
+        transform: translateX(0);
+    }
+}
+
+/* Metric Breakdown */
+.metric-breakdown {
+    padding: 15px;
+}
+
+.metric-item {
+    margin-bottom: 20px;
+}
+
+.metric-label {
+    font-weight: 500;
+    margin-bottom: 8px;
+    color: #495057;
+}
+
+.metric-label i {
+    margin-right: 8px;
+    width: 20px;
+    text-align: center;
+}
+
+.progress {
+    height: 25px;
+    background-color: #e9ecef;
+    border-radius: 5px;
+}
+
+.progress-bar {
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: width 0.6s ease;
+}
+
+/* Alternative Options */
+.alternative-item {
+    padding: 10px;
+    border: 1px solid #dee2e6;
+    border-radius: 5px;
+    transition: background-color 0.2s;
+}
+
+.alternative-item:hover {
+    background-color: #f8f9fa;
+}
+
+/* Advanced Metrics */
+.advanced-metrics {
+    background-color: #f8f9fa;
+    padding: 15px;
+    border-radius: 5px;
+}
+
+.advanced-metrics h6 {
+    color: #495057;
+    margin-bottom: 10px;
+}
+
+.advanced-metrics li {
+    padding: 5px 0;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.advanced-metrics li:last-child {
+    border-bottom: none;
+}
+
+/* Interactive Elements */
+.btn {
+    transition: all 0.2s;
+}
+
+.btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+}
+
+/* Summary Box */
+.itinerary-summary {
+    background-color: #f8f9fa;
+    padding: 15px;
+    border-radius: 5px;
+    margin-top: 20px;
+}
+
+.itinerary-summary h6 {
+    color: #495057;
+    margin-bottom: 10px;
+}
+
+.itinerary-summary li {
+    padding: 5px 0;
+}
+
+.itinerary-summary i {
+    color: #6c757d;
+    margin-right: 8px;
+    width: 20px;
+    text-align: center;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .metric-value {
+        font-size: 2rem;
+    }
+    
+    .primary-metric .metric-value {
+        font-size: 2.5rem;
+    }
+    
+    .timeline-time {
+        min-width: auto;
+        display: block;
+        margin-bottom: 5px;
+    }
+    
+    .timeline-item {
+        flex-direction: column;
+    }
+    
+    .timeline-content {
+        margin-top: 10px;
+        padding-left: 0;
+        border-left: none;
+        border-top: 3px solid #0d6efd;
+        padding-top: 10px;
+    }
+}
+
+/* Loading Animation */
+.loading-spinner {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 3px solid rgba(255,255,255,.3);
+    border-radius: 50%;
+    border-top-color: #fff;
+    animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Card Hover Effects */
+.card {
+    transition: box-shadow 0.3s;
+}
+
+.card:hover {
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+/* Badge Styling */
+.badge {
+    font-weight: normal;
+    padding: 0.35em 0.65em;
+}
+
+/* Input Focus States */
+.form-control:focus,
+.form-select:focus,
+.form-range:focus {
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+}
+
+/* Custom Alert Styles */
+.alert {
+    border: none;
+    border-radius: 10px;
+}
+
+/* Navbar Brand */
+.navbar-brand {
+    font-weight: bold;
+    font-size: 1.25rem;
+}
+
+.navbar-brand i {
+    margin-right: 8px;
+}
+
+/* Print Styles */
+@media print {
+    .no-print {
+        display: none !important;
+    }
+    
+    .metric-card {
+        break-inside: avoid;
+    }
+    
+    .timeline-item {
+        break-inside: avoid;
+    }
+}

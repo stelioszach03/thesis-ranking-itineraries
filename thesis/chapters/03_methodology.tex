@@ -1,0 +1,134 @@
+% Chapter 3: Methodology
+
+\section{Problem Formalization}
+
+We formalize the quality-based itinerary ranking problem as follows:
+
+\textbf{Given:}
+\begin{itemize}
+    \item POI set $P = \{p_1, ..., p_n\}$ with attributes $a_i = (loc_i, cat_i, rating_i, fee_i, duration_i)$
+    \item User preferences $U = \{u_c : c \in Categories\}$ where $u_c \in [0,1]$
+    \item Constraints $C = (budget, time_{max}, loc_{start}, loc_{end})$
+    \item Dynamic events $E = \{e_t : t \in TimeSteps\}$
+\end{itemize}
+
+\textbf{Find:} Itinerary $I^* = \langle p_{i1}, ..., p_{ik} \rangle$ maximizing:
+$$CSS(I) = w_1 \cdot SAT(I) + w_2 \cdot TUR(I) + w_3 \cdot FEA(I) + w_4 \cdot DIV(I)$$
+
+\section{Composite Satisfaction Score (CSS)}
+
+The CSS integrates four components with learned weights:
+
+\subsection{Attractiveness Score (SAT)}
+$$SAT(I) = \frac{1}{|I|} \sum_{p \in I} rating_p \times popularity_p \times u_{cat_p}$$
+
+\subsection{Time Utilization Rate (TUR)}
+$$TUR(I) = \frac{\sum_{p \in I} duration_p}{time_{available} - time_{travel}}$$
+
+\subsection{Feasibility Score (FEA)}
+$$FEA(I) = \prod_{c \in C} \mathbb{1}[c \text{ satisfied}] \times P(complete|weather, traffic)$$
+
+\subsection{Diversity Score (DIV)}
+Using Vendi Score for experience diversity:
+$$DIV(I) = \exp\left(-\sum_{c \in Categories} p_c \log p_c\right)$$
+
+\section{Algorithm Design}
+
+\subsection{Greedy with Quality Metrics}
+\begin{algorithm}
+\caption{Quality-Aware Greedy Selection}
+\begin{algorithmic}
+\STATE \textbf{Input:} POIs $P$, preferences $U$, constraints $C$
+\STATE \textbf{Output:} Itinerary $I$
+\STATE $I \leftarrow \emptyset$, $current \leftarrow start\_location$
+\WHILE{$time_{remaining} > 0$ and $|I| < max\_pois$}
+    \STATE $candidates \leftarrow$ FilterFeasible($P \setminus I$, $current$, $C$)
+    \STATE $p^* \leftarrow \arg\max_{p \in candidates}$ MarginalCSS($I \cup \{p\}$)
+    \STATE $I \leftarrow I \cup \{p^*\}$
+    \STATE Update($current$, $time_{remaining}$, $budget_{remaining}$)
+\ENDWHILE
+\RETURN $I$
+\end{algorithmic}
+\end{algorithm}
+
+\subsection{A* with Admissible Heuristics}
+State space: $(current\_poi, visited\_set, time\_used, budget\_used)$
+
+Heuristic function:
+$$h(state) = \frac{MST(unvisited) \times avg\_duration}{avg\_speed} + \min_{p \in unvisited} distance(current, p)$$
+
+\subsection{LPA* for Dynamic Replanning}
+Key innovation: Maintaining $g^*$ and $rhs$ values for incremental updates:
+\begin{itemize}
+    \item $g^*(s)$: Current best cost to reach state $s$
+    \item $rhs(s)$: One-step lookahead value
+    \item If $g^*(s) \neq rhs(s)$, state is inconsistent and needs update
+\end{itemize}
+
+\section{Hybrid Framework}
+
+\begin{algorithm}
+\caption{Hybrid Planner with Algorithm Selection}
+\begin{algorithmic}
+\STATE \textbf{function} SelectAlgorithm($n$, $constraints$, $dynamics$)
+\IF{$n < 100$ and $optimality\_required$}
+    \RETURN A*
+\ELSIF{$dynamics\_expected$}
+    \RETURN LPA*
+\ELSIF{$n > 1000$ or $time\_critical$}
+    \RETURN HeapGreedy
+\ELSE
+    \RETURN Greedy
+\ENDIF
+\end{algorithmic}
+\end{algorithm}
+
+\section{Implementation Optimizations}
+
+\subsection{Spatial Indexing}
+R-tree for $O(\log n)$ nearest neighbor queries:
+\begin{itemize}
+    \item Bulk loading for initial construction
+    \item Dynamic insertions for new POIs
+    \item Range queries for proximity search
+\end{itemize}
+
+\subsection{Distance Precomputation}
+Manhattan distance with NYC grid correction:
+$$d_{manhattan}(p_1, p_2) = 1.4 \times (|lat_1 - lat_2| + |lon_1 - lon_2|) \times 111.32$$
+
+\subsection{Parallel Processing}
+\begin{itemize}
+    \item Candidate generation parallelized across CPU cores
+    \item Batch distance computations with NumPy vectorization
+    \item Concurrent alternative generation for Pareto frontiers
+\end{itemize}
+
+\section{Evaluation Methodology}
+
+\subsection{Datasets}
+\begin{itemize}
+    \item NYC: 10,847 POIs across Manhattan
+    \item 8 tourist profiles from user studies
+    \item 384 scenarios (profiles × durations × seasons × events)
+\end{itemize}
+
+\subsection{Metrics}
+\begin{itemize}
+    \item Success rate: \% satisfying all constraints
+    \item CSS score: Average quality across successful plans
+    \item Runtime: 95th percentile response time
+    \item Diversity: Category distribution entropy
+\end{itemize}
+
+\subsection{Baselines}
+\begin{itemize}
+    \item TravelPlanner (Xie et al., 2024): 0.6\% success rate
+    \item Coverage maximization: Traditional approach
+    \item Distance minimization: Shortest path variant
+    \item Random selection: Lower bound
+\end{itemize}
+
+\section{Summary}
+
+Our methodology transforms itinerary planning through quality-based ranking, efficient algorithms, and dynamic adaptation. The CSS metric captures multi-faceted tourist satisfaction while the hybrid framework balances optimality with real-time performance. The next chapter details the implementation of these concepts in a production-ready system.

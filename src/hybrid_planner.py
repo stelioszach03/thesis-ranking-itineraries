@@ -27,25 +27,22 @@ from functools import lru_cache
 import threading
 from rtree import index
 import heapq
-import sys
-import os
 
-# Add parent directory for imports
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
-from metrics_definitions import (
+# Use relative imports for sibling modules
+from .metrics_definitions import (
     POI, Itinerary, QuantitativeMetrics, QualitativeMetrics,
     CompositeUtilityFunctions
 )
-from greedy_algorithms import (
+from .greedy_algorithms import (
     GreedyPOISelection, HeapPrunGreedyPOI, GreedyPlanner,
     Constraints, InteractiveFeedback
 )
-from astar_itinerary import (
+from .astar_itinerary import (
     AStarItineraryPlanner, MemoryBoundedAStarPlanner,
     ItineraryState, SearchNode, manhattan_distance_numba,
     compute_distance_matrix_numba, get_borough_id, NYC_BOROUGHS
 )
-from lpa_star import (
+from .lpa_star import (
     LPAStarPlanner, DynamicUpdate, UpdateType
 )
 
@@ -1274,10 +1271,33 @@ def demonstrate_hybrid_planner():
         print(f"{algo}: {stats['count']} runs, avg {stats['avg_time']:.3f}s")
 
 
-if __name__ == "__main__":
-    # Run demonstration
-    demonstrate_hybrid_planner()
+def main():
+    """Command-line interface for hybrid planner"""
+    import argparse
     
-    # Run tests
-    print("\n=== Running Unit Tests ===")
-    unittest.main(argv=[''], exit=False, verbosity=2)
+    parser = argparse.ArgumentParser(description='NYC Itinerary Planner')
+    parser.add_argument('--demo', action='store_true', help='Run demonstration')
+    parser.add_argument('--test', action='store_true', help='Run unit tests')
+    parser.add_argument('--algorithm', choices=['greedy', 'heap_greedy', 'astar', 'lpa_star', 'auto'],
+                        default='auto', help='Algorithm to use')
+    parser.add_argument('--pois', type=int, default=5, help='Number of POIs to include')
+    parser.add_argument('--budget', type=float, default=200, help='Budget in USD')
+    parser.add_argument('--duration', type=float, default=8, help='Duration in hours')
+    
+    args = parser.parse_args()
+    
+    if args.demo:
+        demonstrate_hybrid_planner()
+    elif args.test:
+        print("\n=== Running Unit Tests ===")
+        unittest.main(argv=[''], exit=False, verbosity=2)
+    else:
+        # Run planning with specified parameters
+        print(f"Planning itinerary with {args.algorithm} algorithm...")
+        print(f"Target: {args.pois} POIs, ${args.budget} budget, {args.duration} hours")
+        # Implementation would go here
+        print("Interactive planning not yet implemented. Use --demo for demonstration.")
+
+
+if __name__ == "__main__":
+    main()

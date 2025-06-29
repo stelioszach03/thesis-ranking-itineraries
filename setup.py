@@ -69,9 +69,10 @@ setup(
     },
     entry_points={
         "console_scripts": [
-            "nyc-planner=src.hybrid_planner:main",
-            "nyc-demo=demo.demo_nyc:main",
-            "prepare-nyc-data=src.prepare_nyc_data:main",
+            "nyc-planner=hybrid_planner:main",
+            "nyc-benchmark=benchmarks.benchmark_runner:main",
+            "nyc-generate-results=benchmarks.generate_thesis_results:main",
+            "prepare-nyc-data=prepare_nyc_data:main",
         ],
     },
     include_package_data=True,

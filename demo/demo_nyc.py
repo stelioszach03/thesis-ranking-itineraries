@@ -21,14 +21,15 @@ import sys
 from typing import List, Dict, Tuple
 import random
 import time
+import logging
 
-# Add project imports
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
-from greedy_algorithms import GreedyPOISelection, HeapPrunGreedyPOI, Constraints
-from astar_itinerary import AStarItineraryPlanner
-from lpa_star import LPAStarPlanner, DynamicUpdate, UpdateType
-from hybrid_planner import HybridItineraryPlanner
-from metrics_definitions import CompositeUtilityFunctions
+# Add parent directory to import from src
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from src.greedy_algorithms import GreedyPOISelection, HeapPrunGreedyPOI, Constraints
+from src.astar_itinerary import AStarItineraryPlanner
+from src.lpa_star import LPAStarPlanner, DynamicUpdate, UpdateType
+from src.hybrid_planner import HybridItineraryPlanner
+from src.metrics_definitions import CompositeUtilityFunctions
 
 app = Flask(__name__)
 app.secret_key = 'nyc-itinerary-demo-2025'
@@ -131,164 +132,329 @@ def get_pois():
 @app.route('/api/plan', methods=['POST'])
 def plan_itinerary():
     """Generate itinerary based on preferences"""
-    data = request.json
+    try:
+        data = request.json
+        if not data:
+            return jsonify({'success': False, 'error': 'No data provided'}), 400
     
-    # Extract parameters
-    algorithm = data.get('algorithm', 'hybrid')
-    preferences = data.get('preferences', {})
-    constraints = Constraints(
-        budget=data.get('budget', 200),
-        max_time_hours=data.get('duration', 8),
-        min_pois=3,
-        max_pois=7,  # Research-validated range
-        start_time=data.get('start_time', 9.0)
-    )
+        # Extract and validate parameters
+        algorithm = data.get('algorithm', 'hybrid')
+        if algorithm not in ALGORITHMS:
+            return jsonify({'success': False, 'error': f'Invalid algorithm: {algorithm}'}), 400
+            
+        preferences = data.get('preferences', {})
+        
+        # Validate constraints
+        try:
+            budget = float(data.get('budget', 200))
+            if budget <= 0:
+                return jsonify({'success': False, 'error': 'Budget must be positive'}), 400
+                
+            duration = float(data.get('duration', 8))
+            if not 1 <= duration <= 24:
+                return jsonify({'success': False, 'error': 'Duration must be between 1-24 hours'}), 400
+                
+            start_time = float(data.get('start_time', 9.0))
+            if not 0 <= start_time <= 23:
+                return jsonify({'success': False, 'error': 'Start time must be between 0-23'}), 400
+                
+            constraints = Constraints(
+                budget=budget,
+                max_time_hours=duration,
+                min_pois=3,
+                max_pois=7,  # Research-validated range
+                start_time=start_time
+            )
+        except (ValueError, TypeError) as e:
+            return jsonify({'success': False, 'error': f'Invalid constraint value: {str(e)}'}), 400
     
-    # Run selected algorithm
-    start_time = time.time()
-    
-    if algorithm in ALGORITHMS:
-        planner = ALGORITHMS[algorithm]
-        itinerary = planner.select_pois(preferences, constraints)
+        # Run selected algorithm with error handling
+        start_time = time.time()
         
-        # Calculate CSS metrics
-        css_scores = CompositeUtilityFunctions.calculate_all_metrics(
-            itinerary, preferences, constraints.budget, constraints.max_time_hours
-        )
-        
-        runtime = (time.time() - start_time) * 1000  # milliseconds
-        
+        try:
+            planner = ALGORITHMS[algorithm]
+            itinerary = planner.select_pois(preferences, constraints)
+            
+            if not itinerary:
+                return jsonify({
+                    'success': False, 
+                    'error': 'No feasible itinerary found with given constraints'
+                }), 404
+            
+            # Calculate CSS metrics
+            css_scores = CompositeUtilityFunctions.calculate_all_metrics(
+                itinerary, preferences, constraints.budget, constraints.max_time_hours
+            )
+            
+            runtime = (time.time() - start_time) * 1000  # milliseconds
+            
+            # Store in session for dynamic updates
+            session['current_itinerary'] = [poi.id for poi in itinerary]
+            session['algorithm'] = algorithm
+            session['preferences'] = preferences
+            session['constraints'] = constraints.__dict__
+            
+            return jsonify({
+                'success': True,
+                'itinerary': format_itinerary(itinerary),
+                'metrics': {
+                    'css': css_scores['css'],
+                    'satisfaction': css_scores['satisfaction'],
+                    'time_utilization': css_scores['time_utilization'],
+                    'feasibility': css_scores['feasibility'],
+                    'diversity': css_scores['diversity'],
+                    'vendi_score': css_scores.get('vendi_score', 0)
+                },
+                'runtime': runtime,
+                'algorithm': algorithm,
+                'session_id': session.sid if hasattr(session, 'sid') else None
+            })
+            
+        except Exception as e:
+            app.logger.error(f"Algorithm error: {str(e)}", exc_info=True)
+            return jsonify({
+                'success': False,
+                'error': f'Algorithm failed: {str(e)}'
+            }), 500
+            
+    except Exception as e:
+        app.logger.error(f"Request error: {str(e)}", exc_info=True)
         return jsonify({
-            'success': True,
-            'itinerary': format_itinerary(itinerary),
-            'metrics': {
-                'css': css_scores['css'],
-                'satisfaction': css_scores['satisfaction'],
-                'time_utilization': css_scores['time_utilization'],
-                'feasibility': css_scores['feasibility'],
-                'diversity': css_scores['diversity'],
-                'vendi_score': css_scores.get('vendi_score', 0)
-            },
-            'runtime': runtime,
-            'algorithm': algorithm
-        })
-    
-    return jsonify({'success': False, 'error': 'Invalid algorithm'})
+            'success': False,
+            'error': 'Internal server error'
+        }), 500
 
 @app.route('/api/update', methods=['POST'])
 def handle_dynamic_update():
     """Demonstrate LPA* dynamic replanning"""
-    data = request.json
-    update_type = data.get('type')
+    try:
+        data = request.json
+        if not data:
+            return jsonify({'success': False, 'error': 'No data provided'}), 400
+            
+        update_type = data.get('type')
+        if not update_type:
+            return jsonify({'success': False, 'error': 'Update type required'}), 400
+        
+        # Get current itinerary from session
+        current_itinerary = session.get('current_itinerary')
+        if not current_itinerary:
+            return jsonify({'success': False, 'error': 'No active itinerary'}), 404
     
-    # Get current itinerary from session
-    current_itinerary = session.get('current_itinerary')
-    if not current_itinerary:
-        return jsonify({'success': False, 'error': 'No active itinerary'})
+        # Create dynamic update
+        try:
+            if update_type == 'subway_disruption':
+                update = DynamicUpdate(
+                    update_type=UpdateType.SUBWAY_DISRUPTION,
+                    poi_ids=[],
+                    timestamp=datetime.now(),
+                    details={'lines': ['N', 'Q', 'R', 'W']}
+                )
+            elif update_type == 'weather_rain':
+                # Close outdoor attractions
+                outdoor_pois = [p['id'] for p in NYC_POI_DATA if p['category'] in ['park', 'walking_tour']]
+                update = DynamicUpdate(
+                    update_type=UpdateType.WEATHER_CLOSURE,
+                    poi_ids=outdoor_pois,
+                    timestamp=datetime.now(),
+                    duration_hours=4
+                )
+            elif update_type == 'poi_closed':
+                poi_id = data.get('poi_id')
+                if not poi_id:
+                    return jsonify({'success': False, 'error': 'POI ID required for closure'}), 400
+                update = DynamicUpdate(
+                    update_type=UpdateType.POI_CLOSURE,
+                    poi_ids=[poi_id],
+                    timestamp=datetime.now()
+                )
+            else:
+                return jsonify({'success': False, 'error': f'Unknown update type: {update_type}'}), 400
+        except Exception as e:
+            return jsonify({'success': False, 'error': f'Failed to create update: {str(e)}'}), 500
     
-    # Create dynamic update
-    if update_type == 'subway_disruption':
-        update = DynamicUpdate(
-            update_type=UpdateType.SUBWAY_DISRUPTION,
-            poi_ids=[],
-            timestamp=datetime.now(),
-            details={'lines': ['N', 'Q', 'R', 'W']}
-        )
-    elif update_type == 'weather_rain':
-        # Close outdoor attractions
-        outdoor_pois = [p['id'] for p in NYC_POI_DATA if p['category'] in ['park', 'walking_tour']]
-        update = DynamicUpdate(
-            update_type=UpdateType.WEATHER_CLOSURE,
-            poi_ids=outdoor_pois,
-            timestamp=datetime.now(),
-            duration_hours=4
-        )
-    else:
-        return jsonify({'success': False, 'error': 'Unknown update type'})
-    
-    # Use LPA* for replanning
-    start_time = time.time()
-    lpa_planner = ALGORITHMS['lpa_star']
-    
-    # Initialize with current itinerary
-    lpa_planner.initialize_with_path(current_itinerary)
-    
-    # Apply update and replan
-    new_itinerary = lpa_planner.handle_dynamic_update(update)
-    runtime = (time.time() - start_time) * 1000
-    
-    # Calculate metrics
-    css_scores = CompositeUtilityFunctions.calculate_all_metrics(
-        new_itinerary, session.get('preferences', {}), 
-        session.get('budget', 200), session.get('duration', 8)
-    )
-    
-    return jsonify({
-        'success': True,
-        'original_itinerary': format_itinerary(current_itinerary),
-        'new_itinerary': format_itinerary(new_itinerary),
-        'metrics': css_scores,
-        'runtime': runtime,
-        'computation_reuse': lpa_planner.get_reuse_percentage()
-    })
+        # Use LPA* for replanning
+        start_time = time.time()
+        
+        try:
+            lpa_planner = ALGORITHMS['lpa_star']
+            
+            # Initialize with current itinerary
+            lpa_planner.initialize_with_path(current_itinerary)
+            
+            # Apply update and replan
+            new_itinerary = lpa_planner.handle_dynamic_update(update)
+            
+            if not new_itinerary:
+                return jsonify({
+                    'success': False,
+                    'error': 'No feasible itinerary after update'
+                }), 404
+                
+            runtime = (time.time() - start_time) * 1000
+            
+            # Calculate metrics
+            css_scores = CompositeUtilityFunctions.calculate_all_metrics(
+                new_itinerary, session.get('preferences', {}), 
+                session.get('constraints', {}).get('budget', 200), 
+                session.get('constraints', {}).get('max_time_hours', 8)
+            )
+            
+            # Update session
+            session['current_itinerary'] = [poi.id for poi in new_itinerary]
+            
+            return jsonify({
+                'success': True,
+                'original_itinerary': current_itinerary,
+                'new_itinerary': format_itinerary(new_itinerary),
+                'metrics': css_scores,
+                'runtime': runtime,
+                'computation_reuse': lpa_planner.get_reuse_percentage(),
+                'update_details': {
+                    'type': update_type,
+                    'affected_pois': len(update.poi_ids)
+                }
+            })
+            
+        except Exception as e:
+            app.logger.error(f"Replanning error: {str(e)}", exc_info=True)
+            return jsonify({
+                'success': False,
+                'error': f'Replanning failed: {str(e)}'
+            }), 500
+            
+    except Exception as e:
+        app.logger.error(f"Update handler error: {str(e)}", exc_info=True)
+        return jsonify({
+            'success': False,
+            'error': 'Internal server error'
+        }), 500
 
 @app.route('/api/learn_preferences', methods=['POST'])
 def learn_preferences():
     """Update preferences based on user feedback"""
-    data = request.json
-    liked_pois = data.get('liked', [])
-    disliked_pois = data.get('disliked', [])
-    
-    # Simple preference learning
-    preferences = session.get('preferences', {})
-    
-    # Increase weight for liked categories
-    for poi_id in liked_pois:
-        poi = next(p for p in NYC_POI_DATA if p['id'] == poi_id)
-        category = poi['category']
-        preferences[category] = min(1.0, preferences.get(category, 0.5) + 0.1)
-    
-    # Decrease weight for disliked categories
-    for poi_id in disliked_pois:
-        poi = next(p for p in NYC_POI_DATA if p['id'] == poi_id)
-        category = poi['category']
-        preferences[category] = max(0.0, preferences.get(category, 0.5) - 0.1)
-    
-    session['preferences'] = preferences
-    
-    return jsonify({
-        'success': True,
-        'updated_preferences': preferences
-    })
+    try:
+        data = request.json
+        if not data:
+            return jsonify({'success': False, 'error': 'No data provided'}), 400
+            
+        liked_pois = data.get('liked', [])
+        disliked_pois = data.get('disliked', [])
+        
+        if not liked_pois and not disliked_pois:
+            return jsonify({'success': False, 'error': 'No feedback provided'}), 400
+        
+        # Simple preference learning
+        preferences = session.get('preferences', {})
+        
+        # Increase weight for liked categories
+        for poi_id in liked_pois:
+            poi = next((p for p in NYC_POI_DATA if p['id'] == poi_id), None)
+            if not poi:
+                continue  # Skip invalid POI IDs
+            category = poi['category']
+            preferences[category] = min(1.0, preferences.get(category, 0.5) + 0.1)
+        
+        # Decrease weight for disliked categories
+        for poi_id in disliked_pois:
+            poi = next((p for p in NYC_POI_DATA if p['id'] == poi_id), None)
+            if not poi:
+                continue  # Skip invalid POI IDs
+            category = poi['category']
+            preferences[category] = max(0.0, preferences.get(category, 0.5) - 0.1)
+        
+        session['preferences'] = preferences
+        
+        return jsonify({
+            'success': True,
+            'updated_preferences': preferences,
+            'feedback_processed': {
+                'liked': len(liked_pois),
+                'disliked': len(disliked_pois)
+            }
+        })
+        
+    except Exception as e:
+        app.logger.error(f"Preference learning error: {str(e)}", exc_info=True)
+        return jsonify({
+            'success': False,
+            'error': 'Failed to update preferences'
+        }), 500
 
 @app.route('/api/export_google_maps', methods=['POST'])
 def export_to_google_maps():
     """Generate Google Maps URL for itinerary"""
-    data = request.json
-    itinerary = data.get('itinerary', [])
-    
-    if not itinerary:
-        return jsonify({'success': False, 'error': 'No itinerary provided'})
-    
-    # Build Google Maps directions URL
-    base_url = "https://www.google.com/maps/dir/"
-    waypoints = []
-    
-    for poi_id in itinerary:
-        poi = next(p for p in NYC_POI_DATA if p['id'] == poi_id)
-        waypoints.append(f"{poi['lat']},{poi['lon']}")
-    
-    maps_url = base_url + "/".join(waypoints)
-    
-    return jsonify({
-        'success': True,
-        'maps_url': maps_url
-    })
+    try:
+        data = request.json
+        if not data:
+            return jsonify({'success': False, 'error': 'No data provided'}), 400
+            
+        itinerary = data.get('itinerary', [])
+        
+        if not itinerary:
+            return jsonify({'success': False, 'error': 'No itinerary provided'}), 400
+        
+        # Build Google Maps directions URL
+        base_url = "https://www.google.com/maps/dir/"
+        waypoints = []
+        
+        for poi_id in itinerary:
+            poi = next((p for p in NYC_POI_DATA if p['id'] == poi_id), None)
+            if not poi:
+                return jsonify({
+                    'success': False,
+                    'error': f'Invalid POI ID: {poi_id}'
+                }), 400
+            waypoints.append(f"{poi['lat']},{poi['lon']}")
+        
+        if len(waypoints) > 10:
+            return jsonify({
+                'success': False,
+                'error': 'Google Maps supports maximum 10 waypoints'
+            }), 400
+            
+        maps_url = base_url + "/".join(waypoints)
+        
+        return jsonify({
+            'success': True,
+            'maps_url': maps_url,
+            'waypoint_count': len(waypoints)
+        })
+        
+    except Exception as e:
+        app.logger.error(f"Export error: {str(e)}", exc_info=True)
+        return jsonify({
+            'success': False,
+            'error': 'Failed to generate export'
+        }), 500
 
 def format_itinerary(itinerary):
     """Format itinerary for JSON response"""
-    if not itinerary:
-        return None
+    try:
+        if not itinerary:
+            return None
+        
+        # Handle both list and Itinerary object
+        if isinstance(itinerary, list):
+            # Convert list of POIs to proper format
+            total_cost = sum(poi.get('entrance_fee', 0) for poi in itinerary)
+            total_time = sum(poi.get('avg_visit_duration', 1) for poi in itinerary)
+            formatted = {
+                'pois': [],
+                'total_time': total_time,
+                'total_distance': 0,  # Will calculate below
+                'total_cost': total_cost
+            }
+            pois_list = itinerary
+        else:
+            # Handle Itinerary object
+            formatted = {
+                'pois': [],
+                'total_time': getattr(itinerary, 'total_time', 0),
+                'total_distance': getattr(itinerary, 'total_distance', 0),
+                'total_cost': getattr(itinerary, 'total_cost', 0)
+            }
+            pois_list = itinerary.pois
         
     formatted = {
         'pois': [],
@@ -314,9 +480,17 @@ def format_itinerary(itinerary):
             'category': poi['category']
         })
         
-        current_time += poi['avg_visit_duration']
+        current_time += poi.get('avg_visit_duration', 1)
+        
+        # Update total distance
+        if i > 0:
+            formatted['total_distance'] += travel_time * 4.0  # km
     
-    return formatted
+        return formatted
+        
+    except Exception as e:
+        app.logger.error(f"Format error: {str(e)}", exc_info=True)
+        return None
 
 def create_demo_map():
     """Create interactive Folium map of Manhattan"""
@@ -346,6 +520,67 @@ def create_demo_map():
     
     return manhattan_map._repr_html_()
 
+# Global error handlers
+@app.errorhandler(404)
+def not_found_error(error):
+    return jsonify({
+        'success': False,
+        'error': 'Endpoint not found'
+    }), 404
+
+@app.errorhandler(405)
+def method_not_allowed_error(error):
+    return jsonify({
+        'success': False,
+        'error': 'Method not allowed'
+    }), 405
+
+@app.errorhandler(500)
+def internal_error(error):
+    app.logger.error(f"Internal error: {str(error)}", exc_info=True)
+    return jsonify({
+        'success': False,
+        'error': 'Internal server error'
+    }), 500
+
+@app.errorhandler(Exception)
+def handle_exception(error):
+    app.logger.error(f"Unhandled exception: {str(error)}", exc_info=True)
+    return jsonify({
+        'success': False,
+        'error': 'An unexpected error occurred'
+    }), 500
+
+# Request validation
+@app.before_request
+def validate_json():
+    """Validate JSON requests"""
+    if request.method in ['POST', 'PUT'] and request.endpoint:
+        if request.content_type != 'application/json':
+            return jsonify({
+                'success': False,
+                'error': 'Content-Type must be application/json'
+            }), 400
+
+# CORS headers for demo
+@app.after_request
+def after_request(response):
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
+    response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
+    return response
+
 if __name__ == '__main__':
-    load_nyc_data()
-    app.run(debug=True, port=5000)
+    # Configure logging
+    logging.basicConfig(
+        level=logging.INFO,
+        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    )
+    
+    try:
+        load_nyc_data()
+        app.logger.info("NYC data loaded successfully")
+        app.run(debug=True, port=5000)
+    except Exception as e:
+        app.logger.error(f"Failed to start server: {str(e)}", exc_info=True)
+        sys.exit(1)

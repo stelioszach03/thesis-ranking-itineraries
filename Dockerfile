@@ -1,46 +1,39 @@
-# Dockerfile for NYC Itinerary Planning System
-# Based on research reproducibility requirements
+# NYC Itinerary Demo Docker Image
+FROM python:3.10-slim
 
-FROM python:3.8.13-slim
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    gcc \
+    g++ \
+    libspatialindex-dev \
+    && rm -rf /var/lib/apt/lists/*
 
 # Set working directory
 WORKDIR /app
 
-# Install system dependencies
-RUN apt-get update && apt-get install -y \
-    build-essential \
-    libspatialindex-dev \
-    libgeos-dev \
-    libproj-dev \
-    gdal-bin \
-    git \
-    curl \
-    && rm -rf /var/lib/apt/lists/*
-
 # Copy requirements first for better caching
 COPY requirements.txt .
-
-# Install Python dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy application code
-COPY . .
+# Copy source code
+COPY src/ ./src/
+COPY demo/ ./demo/
+COPY data/ ./data/
+COPY setup.py .
+COPY README.md .
 
-# Create data directory
-RUN mkdir -p data benchmarks/results
+# Install package
+RUN pip install -e .
+
+# Prepare NYC data
+RUN python src/prepare_nyc_data.py
+
+# Expose Flask port
+EXPOSE 5000
 
 # Set environment variables
+ENV FLASK_APP=demo/demo_nyc.py
 ENV PYTHONUNBUFFERED=1
-ENV PYTHONPATH=/app
 
-# Expose Streamlit port
-EXPOSE 8501
-
-# Default command runs benchmarks
-CMD ["python", "benchmarks/benchmark_runner.py"]
-
-# Alternative commands:
-# For Streamlit demo: 
-# CMD ["streamlit", "run", "streamlit_demo.py", "--server.port=8501", "--server.address=0.0.0.0"]
-# For data preparation:
-# CMD ["python", "prepare_nyc_data.py"]
+# Run the demo
+CMD ["python", "demo/demo_nyc.py"]

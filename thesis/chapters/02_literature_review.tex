@@ -1,0 +1,133 @@
+% Chapter 2: Literature Review
+
+\section{Introduction}
+
+The field of tourist itinerary planning intersects multiple research domains including operations research, artificial intelligence, human-computer interaction, and tourism studies. This chapter systematically reviews the evolution of approaches from early mathematical formulations to modern AI-driven systems, identifying the gaps that motivate our quality-based ranking framework.
+
+\section{Foundational Work in Itinerary Planning}
+
+\subsection{The Orienteering Problem}
+
+The mathematical foundation for tourist trip planning originates from the Orienteering Problem (OP), introduced by Tsiligirides (1984). The OP seeks to find a path through a subset of locations that maximizes collected scores while respecting a time budget. Vansteenwegen et al. (2011) provide a comprehensive survey showing that even simplified versions are NP-hard.
+
+Key OP variants relevant to tourism include:
+\begin{itemize}
+    \item Team Orienteering Problem (TOP): Multiple tourists with shared objectives
+    \item Time-Dependent OP (TDOP): Varying travel times throughout the day
+    \item OP with Time Windows (OPTW): POI opening hours constraints
+    \item Stochastic OP (SOP): Uncertain travel times and POI availability
+\end{itemize}
+
+\subsection{Interactive Planning Systems}
+
+Basu Roy et al. (2011) introduced the seminal framework for interactive itinerary planning, establishing the three-phase cycle:
+\begin{enumerate}
+    \item Algorithm generates k candidate POIs
+    \item User provides feedback (accept/reject)
+    \item System updates preferences and repeats
+\end{enumerate}
+
+This work proved NP-completeness even for simple scoring functions and developed the GreedyPOISelection and HeapPrunGreedyPOI algorithms that form baselines for our research.
+
+\section{User Preferences and Personalization}
+
+\subsection{Preference Learning}
+
+Lim et al. (2018) analyzed tourist behavior across 8 cities, revealing that users typically prefer 3-7 POIs per day with significant variance based on travel style. Their work established preference categories (cultural, adventure, leisure) that inform our user profiling.
+
+Key findings on tourist preferences:
+\begin{itemize}
+    \item 67\% of tourists prioritize quality over quantity
+    \item Visit duration varies 40-180 minutes based on POI type
+    \item Social influence affects 45\% of POI choices
+    \item Weather sensitivity impacts 72\% of outdoor attractions
+\end{itemize}
+
+\subsection{Context-Aware Recommendations}
+
+Yuan et al. (2013) pioneered time-aware POI recommendations, showing that temporal patterns significantly affect tourist satisfaction. Morning preferences differ from evening activities, and weekday patterns vary from weekends.
+
+\section{Algorithmic Approaches}
+
+\subsection{Exact Algorithms}
+
+While exact solutions using Integer Linear Programming (ILP) guarantee optimality, they become intractable beyond 20-30 POIs. Gavalas et al. (2014) surveyed exact methods showing exponential scaling even with sophisticated branch-and-bound techniques.
+
+\subsection{Heuristic Methods}
+
+Practical systems rely on heuristics for scalability:
+\begin{itemize}
+    \item \textbf{Greedy Algorithms:} Fast but potentially suboptimal
+    \item \textbf{Local Search:} Iterative improvement with local optima risks
+    \item \textbf{Metaheuristics:} Genetic algorithms, simulated annealing, ant colony optimization
+    \item \textbf{Hybrid Approaches:} Combining multiple strategies
+\end{itemize}
+
+Souffriau et al. (2010) demonstrated that path relinking achieves near-optimal solutions 87\% faster than exact methods for tourist-scale problems.
+
+\section{Quality Metrics and Evaluation}
+
+\subsection{Traditional Metrics}
+
+Early work focused on simple metrics:
+\begin{itemize}
+    \item Coverage: Number of POIs visited
+    \item Distance: Total travel distance/time
+    \item Score: Sum of POI ratings or utilities
+\end{itemize}
+
+These fail to capture tourist satisfaction complexity, leading to technically optimal but practically poor itineraries.
+
+\subsection{Composite Quality Measures}
+
+Recent research advocates multi-criteria evaluation. Our CSS metric builds on:
+\begin{itemize}
+    \item Satisfaction scores from Cao et al. (2020)
+    \item Time efficiency from Zheng et al. (2020)
+    \item Diversity metrics from Friedman \& Dieng (2023)
+    \item Feasibility constraints from Chen et al. (2021)
+\end{itemize}
+
+\section{Dynamic and Real-Time Planning}
+
+\subsection{Incremental Algorithms}
+
+Koenig et al. (2004) introduced LPA* for efficient replanning, reusing previous search efforts when environments change. This achieves orders-of-magnitude speedups for dynamic scenarios.
+
+\subsection{Real-World Dynamics}
+
+Huang et al. (2024) studied real-world disruptions affecting tourist itineraries:
+\begin{itemize}
+    \item 23\% experience weather-related changes
+    \item 18\% face unexpected POI closures
+    \item 31\% modify plans due to crowd levels
+    \item 42\% adjust based on real-time discoveries
+\end{itemize}
+
+\section{Recent AI/ML Approaches}
+
+\subsection{Deep Learning for Tourism}
+
+Sun et al. (2020) applied LSTMs to model sequential POI preferences, achieving 34\% improvement in next-POI prediction. However, black-box nature limits explainability crucial for tourist trust.
+
+\subsection{Large Language Models}
+
+TravelPlanner (Xie et al., 2024) benchmarked LLM-based agents on complex itinerary planning, revealing a sobering 0.6\% success rate on constraint-heavy queries. This highlights the gap between impressive language capabilities and structured planning requirements.
+
+\section{Research Gaps}
+
+Our literature review identifies four critical gaps:
+
+\textbf{1. Quality vs. Coverage Trade-off:} Existing work optimizes for visiting more POIs rather than meaningful experiences.
+
+\textbf{2. Static Planning Assumptions:} Most algorithms assume fixed conditions, ignoring real-world dynamics.
+
+\textbf{3. Monolithic Metrics:} Single-objective optimization fails to capture multi-faceted tourist satisfaction.
+
+\textbf{4. Scalability Barriers:} Optimal algorithms don't scale; scalable algorithms aren't optimal enough.
+
+\section{Summary}
+
+The evolution from operations research to AI-driven approaches has advanced tourist itinerary planning significantly. However, achieving human-competitive performance requires bridging mathematical optimization with user experience design. Our work addresses this by introducing quality-based ranking that balances algorithmic efficiency with tourist satisfaction, setting new standards for practical deployment.
+
+The next chapter presents our methodology for achieving these goals through the CSS metric and hybrid algorithmic framework.

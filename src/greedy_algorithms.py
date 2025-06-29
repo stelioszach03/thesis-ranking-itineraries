@@ -20,12 +20,9 @@ from dataclasses import dataclass, field
 from datetime import datetime, time
 import logging
 from copy import deepcopy
-import sys
-import os
 
-# Add parent directory to path for imports
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
-from metrics_definitions import (
+# Use relative imports for sibling modules
+from .metrics_definitions import (
     POI, Itinerary, QuantitativeMetrics, QualitativeMetrics,
     CompositeUtilityFunctions
 )

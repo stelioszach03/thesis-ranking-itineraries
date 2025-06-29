@@ -20,20 +20,17 @@ from typing import List, Dict, Set, Tuple, Optional, NamedTuple
 from dataclasses import dataclass, field
 from datetime import datetime
 import logging
-import sys
-import os
 from collections import deque
 import gc
 from numba import njit, prange
 import networkx as nx
 
-# Add parent directory for imports
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
-from metrics_definitions import (
+# Use relative imports for sibling modules
+from .metrics_definitions import (
     POI, Itinerary, QuantitativeMetrics, QualitativeMetrics,
     CompositeUtilityFunctions
 )
-from greedy_algorithms import Constraints, InteractiveFeedback
+from .greedy_algorithms import Constraints, InteractiveFeedback
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)

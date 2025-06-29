@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Itinerary Results - NYC Ranking System</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="{{ url_for('index') }}">
+                <i class="fas fa-map-marked-alt"></i> NYC Itinerary Ranking
+            </a>
+            <div class="navbar-text text-white">
+                <small>Bachelor's Thesis - NKUA | Algorithm: {{ algorithm }}</small>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container-fluid mt-4">
+        <!-- Performance Metrics Row -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="metric-card primary-metric">
+                    <h6><i class="fas fa-star"></i> CSS Score</h6>
+                    <div class="metric-value">{{ "%.3f"|format(metrics.css) }}</div>
+                    <small class="text-muted">Composite Satisfaction</small>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="metric-card">
+                    <h6><i class="fas fa-clock"></i> Runtime</h6>
+                    <div class="metric-value">{{ "%.1f"|format(runtime) }}ms</div>
+                    <small class="text-muted">{{ algorithm }} algorithm</small>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="metric-card">
+                    <h6><i class="fas fa-route"></i> Total Distance</h6>
+                    <div class="metric-value">{{ "%.1f"|format(metrics.total_distance) }}km</div>
+                    <small class="text-muted">Manhattan distance</small>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="metric-card">
+                    <h6><i class="fas fa-dollar-sign"></i> Total Cost</h6>
+                    <div class="metric-value">${{ "%.0f"|format(metrics.total_cost) }}</div>
+                    <small class="text-muted">Entrance fees</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Left Column: Itinerary Details -->
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <h5><i class="fas fa-list-ol"></i> Your Optimized Itinerary</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="itinerary-timeline">
+                            {% for poi in itinerary %}
+                            <div class="timeline-item" data-poi-id="{{ poi.id }}">
+                                <div class="timeline-time">{{ poi.arrival_time }}</div>
+                                <div class="timeline-content">
+                                    <h6>{{ poi.name }}</h6>
+                                    <div class="poi-details">
+                                        <span class="badge bg-info">{{ poi.category }}</span>
+                                        <span class="badge bg-warning">{{ poi.duration }}h</span>
+                                        {% if poi.entrance_fee > 0 %}
+                                        <span class="badge bg-danger">${{ poi.entrance_fee }}</span>
+                                        {% endif %}
+                                    </div>
+                                    <div class="poi-metrics mt-2">
+                                        <small>
+                                            <i class="fas fa-star"></i> {{ poi.rating }}/5 |
+                                            <i class="fas fa-users"></i> {{ "%.0f"|format(poi.popularity * 100) }}% popular
+                                        </small>
+                                    </div>
+                                    <div class="mt-2">
+                                        <button class="btn btn-sm btn-outline-danger" onclick="rejectPOI('{{ poi.id }}')">
+                                            <i class="fas fa-times"></i> Remove
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        
+                        <!-- Summary Stats -->
+                        <div class="itinerary-summary mt-4">
+                            <h6>Summary</h6>
+                            <ul class="list-unstyled">
+                                <li><i class="fas fa-map-marker-alt"></i> {{ itinerary|length }} POIs</li>
+                                <li><i class="fas fa-clock"></i> {{ "%.1f"|format(metrics.total_time) }} hours total</li>
+                                <li><i class="fas fa-walking"></i> {{ "%.1f"|format(metrics.total_distance) }}km travel</li>
+                                <li><i class="fas fa-subway"></i> Nearest subway: {{ nearest_subway }}</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Alternative Itineraries -->
+                {% if alternatives %}
+                <div class="card mt-3">
+                    <div class="card-header">
+                        <h6><i class="fas fa-random"></i> Alternative Options</h6>
+                    </div>
+                    <div class="card-body">
+                        {% for alt in alternatives %}
+                        <div class="alternative-item mb-2">
+                            <div class="d-flex justify-content-between">
+                                <span>Option {{ loop.index }}</span>
+                                <span class="badge bg-secondary">CSS: {{ "%.3f"|format(alt.css) }}</span>
+                            </div>
+                            <button class="btn btn-sm btn-outline-primary mt-1" onclick="loadAlternative({{ loop.index0 }})">
+                                Load This Option
+                            </button>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Right Column: Map and Analysis -->
+            <div class="col-md-8">
+                <!-- Interactive Map -->
+                <div id="resultMap" style="height: 500px;" class="mb-3"></div>
+
+                <!-- CSS Components Analysis -->
+                <div class="card">
+                    <div class="card-header">
+                        <h5><i class="fas fa-chart-pie"></i> Quality Metrics Breakdown</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <canvas id="metricsRadar"></canvas>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="metric-breakdown">
+                                    <div class="metric-item">
+                                        <div class="metric-label">
+                                            <i class="fas fa-heart"></i> Attractiveness (35%)
+                                        </div>
+                                        <div class="progress">
+                                            <div class="progress-bar bg-success" style="width: {{ metrics.attractiveness * 100 }}%">
+                                                {{ "%.3f"|format(metrics.attractiveness) }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="metric-item">
+                                        <div class="metric-label">
+                                            <i class="fas fa-clock"></i> Time Efficiency (25%)
+                                        </div>
+                                        <div class="progress">
+                                            <div class="progress-bar bg-info" style="width: {{ metrics.time_efficiency * 100 }}%">
+                                                {{ "%.3f"|format(metrics.time_efficiency) }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="metric-item">
+                                        <div class="metric-label">
+                                            <i class="fas fa-check"></i> Feasibility (25%)
+                                        </div>
+                                        <div class="progress">
+                                            <div class="progress-bar bg-warning" style="width: {{ metrics.feasibility * 100 }}%">
+                                                {{ "%.3f"|format(metrics.feasibility) }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="metric-item">
+                                        <div class="metric-label">
+                                            <i class="fas fa-layer-group"></i> Diversity (15%)
+                                        </div>
+                                        <div class="progress">
+                                            <div class="progress-bar bg-danger" style="width: {{ metrics.diversity * 100 }}%">
+                                                {{ "%.3f"|format(metrics.diversity) }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Advanced Metrics -->
+                                <div class="advanced-metrics mt-3">
+                                    <h6>Advanced Metrics</h6>
+                                    <ul class="list-unstyled">
+                                        <li><strong>Vendi Score:</strong> {{ "%.2f"|format(metrics.vendi_score) }}</li>
+                                        <li><strong>Preference Alignment:</strong> {{ "%.3f"|format(metrics.preference_alignment) }}</li>
+                                        <li><strong>Accessibility Score:</strong> {{ "%.3f"|format(metrics.accessibility) }}</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="d-grid gap-2 mt-3">
+                    <button class="btn btn-success" onclick="exportItinerary()">
+                        <i class="fas fa-download"></i> Export to Google Maps
+                    </button>
+                    <button class="btn btn-primary" onclick="window.location.href='{{ url_for('index') }}'">
+                        <i class="fas fa-redo"></i> Create New Itinerary
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.0/dist/chart.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    
+    <script>
+        // Itinerary data from Flask
+        const itineraryData = {{ itinerary | tojson }};
+        const metricsData = {{ metrics | tojson }};
+        const alternativesData = {{ alternatives | tojson }};
+        
+        // Initialize map
+        let map = L.map('resultMap').setView([40.7614, -73.9776], 13);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+        
+        // Plot itinerary on map
+        let markers = [];
+        let routeCoords = [];
+        
+        itineraryData.forEach((poi, index) => {
+            const marker = L.marker([poi.lat, poi.lon])
+                .bindPopup(`<b>${index + 1}. ${poi.name}</b><br>${poi.category}<br>Rating: ${poi.rating}/5`)
+                .addTo(map);
+            markers.push(marker);
+            routeCoords.push([poi.lat, poi.lon]);
+        });
+        
+        // Draw route
+        if (routeCoords.length > 1) {
+            L.polyline(routeCoords, {color: 'blue', weight: 4, opacity: 0.7}).addTo(map);
+            map.fitBounds(routeCoords);
+        }
+        
+        // Initialize metrics radar chart
+        const ctx = document.getElementById('metricsRadar').getContext('2d');
+        new Chart(ctx, {
+            type: 'radar',
+            data: {
+                labels: ['Attractiveness', 'Time Efficiency', 'Feasibility', 'Diversity'],
+                datasets: [{
+                    label: 'Quality Metrics',
+                    data: [
+                        metricsData.attractiveness,
+                        metricsData.time_efficiency,
+                        metricsData.feasibility,
+                        metricsData.diversity
+                    ],
+                    backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                    borderColor: 'rgb(54, 162, 235)',
+                    pointBackgroundColor: 'rgb(54, 162, 235)',
+                    pointBorderColor: '#fff',
+                    pointHoverBackgroundColor: '#fff',
+                    pointHoverBorderColor: 'rgb(54, 162, 235)'
+                }]
+            },
+            options: {
+                elements: {
+                    line: {
+                        borderWidth: 3
+                    }
+                },
+                scales: {
+                    r: {
+                        angleLines: {
+                            display: false
+                        },
+                        suggestedMin: 0,
+                        suggestedMax: 1
+                    }
+                }
+            }
+        });
+        
+        // Interactive functions
+        function rejectPOI(poiId) {
+            if (confirm('Remove this POI and recalculate itinerary?')) {
+                $.post('/api/feedback', {
+                    rejected_pois: [poiId],
+                    current_itinerary: itineraryData.map(p => p.id)
+                }).done(function(response) {
+                    if (response.success) {
+                        window.location.href = `/results?session_id=${response.session_id}`;
+                    }
+                });
+            }
+        }
+        
+        function loadAlternative(index) {
+            const alternative = alternativesData[index];
+            $.post('/api/load_alternative', {
+                alternative_index: index
+            }).done(function(response) {
+                if (response.success) {
+                    window.location.reload();
+                }
+            });
+        }
+        
+        function exportItinerary() {
+            const waypoints = itineraryData.map(poi => `${poi.lat},${poi.lon}`).join('/');
+            const googleMapsUrl = `https://www.google.com/maps/dir/${waypoints}`;
+            window.open(googleMapsUrl, '_blank');
+        }
+        
+        // Highlight timeline items on hover
+        $('.timeline-item').hover(
+            function() {
+                const poiId = $(this).data('poi-id');
+                const index = itineraryData.findIndex(p => p.id === poiId);
+                if (index >= 0) markers[index].openPopup();
+            },
+            function() {
+                markers.forEach(m => m.closePopup());
+            }
+        );
+    </script>
+</body>
+</html>

@@ -27,12 +27,12 @@ import random
 # Add parent directory for imports
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from metrics_definitions import (
+from src.metrics_definitions import (
     POI, Itinerary, QuantitativeMetrics, QualitativeMetrics,
     CompositeUtilityFunctions
 )
-from greedy_algorithms import Constraints, InteractiveFeedback
-from hybrid_planner import HybridPlanner, AlgorithmType, PlannerConfig
+from src.greedy_algorithms import Constraints, InteractiveFeedback
+from src.hybrid_planner import HybridPlanner, AlgorithmType, PlannerConfig
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -136,13 +136,24 @@ class BenchmarkMetrics:
         return metrics
 
 
+def init_worker_seeds():
+    """Initialize random seeds for worker processes"""
+    # Use process ID to generate unique seed per worker
+    import os
+    worker_seed = 42 + os.getpid() % 1000
+    random.seed(worker_seed)
+    np.random.seed(worker_seed)
+    logger.info(f"Worker process {os.getpid()} initialized with seed {worker_seed}")
+
+
 class BenchmarkRunner:
     """
     Main benchmark execution framework
     """
     
     def __init__(self, pois_file: str, distance_matrix_file: str,
-                 scenarios_file: str, output_dir: str = "benchmarks/results"):
+                 scenarios_file: str, output_dir: str = "benchmarks/results",
+                 random_seed: int = 42):
         """Initialize benchmark runner"""
         # Load data
         with open(pois_file, 'r') as f:
@@ -156,11 +167,17 @@ class BenchmarkRunner:
         self.output_dir = output_dir
         os.makedirs(output_dir, exist_ok=True)
         
+        # Set random seed for reproducibility
+        self.random_seed = random_seed
+        random.seed(self.random_seed)
+        np.random.seed(self.random_seed)
+        
         # Initialize planners with different algorithms
         config = PlannerConfig(
             enable_caching=False,  # Disable for fair comparison
             enable_parallel=True,
-            enable_rtree=True
+            enable_rtree=True,
+            random_seed=self.random_seed  # Pass seed to planner config
         )
         
         self.planners = {
@@ -264,7 +281,8 @@ class BenchmarkRunner:
         completed = 0
         
         if parallel:
-            with ProcessPoolExecutor(max_workers=4) as executor:
+            # Use initializer to set seeds in worker processes
+            with ProcessPoolExecutor(max_workers=4, initializer=init_worker_seeds) as executor:
                 # Submit all tasks
                 futures = {}
                 for scenario in scenarios_to_run:
@@ -609,24 +627,56 @@ def generate_interactive_dashboard(results_file: str, output_file: str):
     logger.info(f"Generated interactive dashboard: {output_file}")
 
 
-if __name__ == "__main__":
+def main():
+    """Main function for benchmark runner"""
+    import argparse
+    
+    parser = argparse.ArgumentParser(description='Run NYC Itinerary Planning Benchmarks')
+    parser.add_argument('--algorithms', nargs='+', 
+                        default=['greedy', 'heap_greedy', 'two_phase', 'auto'],
+                        help='Algorithms to benchmark')
+    parser.add_argument('--n-scenarios', type=int, default=50,
+                        help='Number of scenarios to run')
+    parser.add_argument('--parallel', action='store_true', default=True,
+                        help='Use parallel execution')
+    parser.add_argument('--no-parallel', dest='parallel', action='store_false',
+                        help='Disable parallel execution')
+    parser.add_argument('--seed', type=int, default=42,
+                        help='Random seed for reproducibility')
+    parser.add_argument('--pois-file', default='data/nyc_pois.json',
+                        help='Path to POIs file')
+    parser.add_argument('--matrix-file', default='data/distance_matrix.npy',
+                        help='Path to distance matrix')
+    parser.add_argument('--scenarios-file', 
+                        default='benchmarks/scenarios/nyc_benchmark_scenarios.json',
+                        help='Path to scenarios file')
+    
+    args = parser.parse_args()
     # Set random seeds for reproducibility
     random.seed(42)
     np.random.seed(42)
     
-    # Initialize runner
+    # Initialize runner with fixed seed
+    logger.info(f"Set random seed to {args.seed}")
+    
+    # Initialize runner with fixed seed
     runner = BenchmarkRunner(
-        pois_file="data/nyc_pois.json",
-        distance_matrix_file="data/distance_matrix.npy",
-        scenarios_file="benchmarks/scenarios/nyc_benchmark_scenarios.json"
+        pois_file=args.pois_file,
+        distance_matrix_file=args.matrix_file,
+        scenarios_file=args.scenarios_file,
+        random_seed=args.seed
     )
     
     # Run benchmarks
     print("Starting benchmark execution...")
+    print(f"Algorithms: {args.algorithms}")
+    print(f"Scenarios: {args.n_scenarios}")
+    print(f"Parallel: {args.parallel}")
+    
     results_df = runner.run_benchmarks(
-        algorithms=['greedy', 'heap_greedy', 'two_phase', 'auto'],
-        n_scenarios=50,  # Start with subset
-        parallel=True
+        algorithms=args.algorithms,
+        n_scenarios=args.n_scenarios,
+        parallel=args.parallel
     )
     
     # Analyze results
@@ -654,7 +704,14 @@ if __name__ == "__main__":
     
     # Generate outputs
     runner.generate_latex_tables(analysis, "benchmarks/results/benchmark_tables.tex")
-    generate_interactive_dashboard(
-        f"benchmarks/results/benchmark_results_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv",
+    create_interactive_dashboard(
+        results_df,
         "benchmarks/results/interactive_dashboard.html"
     )
+    
+    print("\n✓ Benchmark complete!")
+    return results_df
+
+
+if __name__ == "__main__":
+    main()

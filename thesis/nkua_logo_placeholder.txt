@@ -1,0 +1,12 @@
+NKUA Logo Placeholder
+====================
+
+This is a placeholder for the National and Kapodistrian University of Athens (NKUA) logo.
+
+To add the actual logo:
+1. Download the official NKUA logo from the university website
+2. Save it as nkua_logo.png in this directory
+3. Ensure it's high resolution (at least 300 DPI)
+4. The LaTeX document will automatically include it
+
+The logo should be the official emblem of NKUA showing the goddess Athena.

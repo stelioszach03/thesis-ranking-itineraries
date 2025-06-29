@@ -15,9 +15,9 @@ import time
 import os
 import sys
 
-# Add parent directory for imports
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
-from lpa_star import (
+# Add parent directory to import from src
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from src.lpa_star import (
     LPAStarPlanner, DynamicUpdate, UpdateType, Constraints
 )
 

@@ -19,21 +19,18 @@ from typing import List, Dict, Set, Tuple, Optional, NamedTuple
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 import logging
-import sys
-import os
 import time
 from collections import defaultdict, deque
 import threading
 from enum import Enum
 
-# Add parent directory for imports
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
-from metrics_definitions import (
+# Use relative imports for sibling modules
+from .metrics_definitions import (
     POI, Itinerary, QuantitativeMetrics, QualitativeMetrics,
     CompositeUtilityFunctions
 )
-from greedy_algorithms import Constraints, InteractiveFeedback
-from astar_itinerary import (
+from .greedy_algorithms import Constraints, InteractiveFeedback
+from .astar_itinerary import (
     ItineraryState, SearchNode, manhattan_distance_numba,
     compute_distance_matrix_numba, get_borough_id, NYC_BOROUGHS
 )
