@@ -7,8 +7,8 @@ import unittest
 import numpy as np
 from typing import List, Dict
 
-from src.metrics_definitions import POI, Constraints, InteractiveFeedback
-from src.greedy_algorithms import GreedyPOISelection, HeapPrunGreedyPOI
+from src.metrics_definitions import POI
+from src.greedy_algorithms import GreedyPOISelection, HeapPrunGreedyPOI, GreedyPlanner, Constraints, InteractiveFeedback
 
 
 class TestGreedyPOISelection(unittest.TestCase):
@@ -18,15 +18,15 @@ class TestGreedyPOISelection(unittest.TestCase):
         """Create test data"""
         self.pois = [
             POI("poi1", "Central Park", 40.7829, -73.9654, "park", 
-                4.7, 0.0, 1.5, (6.0, 22.0), 0.9, 0.95, 0.8),
+                0.9, 0.0, 1.5, (6.0, 22.0), 4.7),
             POI("poi2", "MoMA", 40.7614, -73.9776, "museum", 
-                4.5, 25.0, 2.0, (10.5, 17.5), 0.85, 0.9, 0.2),
+                0.85, 25.0, 2.0, (10.5, 17.5), 4.5),
             POI("poi3", "Times Square", 40.7580, -73.9855, "landmark",
-                4.3, 0.0, 0.5, (0.0, 24.0), 0.95, 0.8, 0.5),
+                0.95, 0.0, 0.5, (0.0, 24.0), 4.3),
             POI("poi4", "Brooklyn Bridge", 40.7061, -73.9969, "landmark",
-                4.6, 0.0, 1.0, (0.0, 24.0), 0.88, 0.85, 0.7),
+                0.88, 0.0, 1.0, (0.0, 24.0), 4.6),
             POI("poi5", "Empire State", 40.7484, -73.9857, "landmark",
-                4.7, 40.0, 2.0, (9.0, 23.0), 0.92, 0.9, 0.3)
+                0.92, 40.0, 2.0, (9.0, 23.0), 4.7)
         ]
         
         # Create distance matrix
@@ -41,7 +41,23 @@ class TestGreedyPOISelection(unittest.TestCase):
                         abs(self.pois[i].lon - self.pois[j].lon)
                     ) * 111  # km per degree
         
-        self.greedy = GreedyPOISelection(self.pois, self.distance_matrix)
+        # Convert POIs to dict format for GreedyPOISelection
+        pois_dict = [
+            {
+                'id': poi.id,
+                'name': poi.name,
+                'lat': poi.lat,
+                'lon': poi.lon,
+                'category': poi.category,
+                'rating': poi.rating,
+                'entrance_fee': poi.entrance_fee,
+                'avg_visit_duration': poi.avg_visit_duration,
+                'opening_hours': {'weekday': list(poi.opening_hours)},
+                'popularity': poi.popularity
+            }
+            for poi in self.pois
+        ]
+        self.greedy = GreedyPOISelection(pois_dict, self.distance_matrix)
     
     def test_basic_selection(self):
         """Test basic POI selection"""
@@ -112,8 +128,8 @@ class TestHeapPrunGreedyPOI(unittest.TestCase):
         self.pois = [
             POI(f"poi{i}", f"Place {i}", 40.7 + i*0.01, -73.9 - i*0.01, 
                 ["park", "museum", "landmark"][i % 3],
-                4.0 + (i % 10) * 0.1, i * 5.0, 1.0 + (i % 3) * 0.5,
-                (8.0, 20.0), 0.8 + (i % 5) * 0.02, 0.85, 0.5)
+                0.8 + (i % 5) * 0.02, i * 5.0, 1.0 + (i % 3) * 0.5,
+                (8.0, 20.0), 4.0 + (i % 10) * 0.1)
             for i in range(20)  # More POIs for heap testing
         ]
         
@@ -124,9 +140,23 @@ class TestHeapPrunGreedyPOI(unittest.TestCase):
                 if i != j:
                     self.distance_matrix[i, j] = abs(i - j) * 0.5  # Simple distance
         
-        self.heap_greedy = HeapPrunGreedyPOI(
-            self.pois, self.distance_matrix, top_k=10
-        )
+        # Convert POIs to dict format for HeapPrunGreedyPOI
+        pois_dict = [
+            {
+                'id': poi.id,
+                'name': poi.name,
+                'lat': poi.lat,
+                'lon': poi.lon,
+                'category': poi.category,
+                'rating': poi.rating,
+                'entrance_fee': poi.entrance_fee,
+                'avg_visit_duration': poi.avg_visit_duration,
+                'opening_hours': {'weekday': list(poi.opening_hours)},
+                'popularity': poi.popularity
+            }
+            for poi in self.pois
+        ]
+        self.heap_greedy = HeapPrunGreedyPOI(pois_dict, self.distance_matrix)
     
     def test_heap_pruning(self):
         """Test that heap pruning works"""
@@ -159,8 +189,9 @@ class TestHeapPrunGreedyPOI(unittest.TestCase):
         # User dislikes first POI
         feedback = InteractiveFeedback(
             rejected_pois={result1[0].id},
-            must_include_pois=set(),
-            adjusted_preferences=preferences
+            preferred_categories=preferences,
+            must_visit_pois=set(),
+            preference_adjustments={}
         )
         
         # Second selection with feedback
@@ -172,7 +203,23 @@ class TestHeapPrunGreedyPOI(unittest.TestCase):
     
     def test_performance_comparison(self):
         """Test that heap version is not worse than regular greedy"""
-        regular_greedy = GreedyPOISelection(self.pois, self.distance_matrix)
+        # Convert POIs to dict format for GreedyPOISelection
+        pois_dict = [
+            {
+                'id': poi.id,
+                'name': poi.name,
+                'lat': poi.lat,
+                'lon': poi.lon,
+                'category': poi.category,
+                'rating': poi.rating,
+                'entrance_fee': poi.entrance_fee,
+                'avg_visit_duration': poi.avg_visit_duration,
+                'opening_hours': {'weekday': list(poi.opening_hours)},
+                'popularity': poi.popularity
+            }
+            for poi in self.pois
+        ]
+        regular_greedy = GreedyPOISelection(pois_dict, self.distance_matrix)
         
         preferences = {"park": 0.8, "museum": 0.9, "landmark": 0.7}
         constraints = Constraints(
@@ -197,11 +244,23 @@ class TestGreedyEdgeCases(unittest.TestCase):
         """Test when no feasible solution exists"""
         pois = [
             POI("expensive", "Expensive Place", 40.7, -73.9, "museum",
-                4.5, 200.0, 2.0, (10.0, 17.0), 0.9, 0.9, 0.2)
+                0.9, 200.0, 2.0, (10.0, 17.0), 4.5)
         ]
         
         distance_matrix = np.array([[0]])
-        greedy = GreedyPOISelection(pois, distance_matrix)
+        pois_dict = [{
+            'id': pois[0].id,
+            'name': pois[0].name,
+            'lat': pois[0].lat,
+            'lon': pois[0].lon,
+            'category': pois[0].category,
+            'rating': pois[0].rating,
+            'entrance_fee': pois[0].entrance_fee,
+            'avg_visit_duration': pois[0].avg_visit_duration,
+            'opening_hours': {'weekday': list(pois[0].opening_hours)},
+            'popularity': pois[0].popularity
+        }]
+        greedy = GreedyPOISelection(pois_dict, distance_matrix)
         
         constraints = Constraints(
             budget=50,  # Can't afford the POI
@@ -217,11 +276,23 @@ class TestGreedyEdgeCases(unittest.TestCase):
         """Test with single POI"""
         pois = [
             POI("single", "Single Place", 40.7, -73.9, "park",
-                4.5, 0.0, 1.0, (6.0, 22.0), 0.9, 0.9, 0.8)
+                0.9, 0.0, 1.0, (6.0, 22.0), 4.5)
         ]
         
         distance_matrix = np.array([[0]])
-        greedy = GreedyPOISelection(pois, distance_matrix)
+        pois_dict = [{
+            'id': pois[0].id,
+            'name': pois[0].name,
+            'lat': pois[0].lat,
+            'lon': pois[0].lon,
+            'category': pois[0].category,
+            'rating': pois[0].rating,
+            'entrance_fee': pois[0].entrance_fee,
+            'avg_visit_duration': pois[0].avg_visit_duration,
+            'opening_hours': {'weekday': list(pois[0].opening_hours)},
+            'popularity': pois[0].popularity
+        }]
+        greedy = GreedyPOISelection(pois_dict, distance_matrix)
         
         constraints = Constraints(
             budget=100,

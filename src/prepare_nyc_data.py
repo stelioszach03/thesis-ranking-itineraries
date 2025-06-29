@@ -64,7 +64,10 @@ NYC_ATTRACTIONS = [
     {'name': 'Rockefeller Center', 'lat': 40.7587, 'lon': -73.9787, 'category': 'landmark', 'rating': 4.6, 'popularity': 0.86, 'fee': 0, 'duration': 1.0},
     {'name': 'Bryant Park', 'lat': 40.7536, 'lon': -73.9832, 'category': 'park', 'rating': 4.5, 'popularity': 0.78, 'fee': 0, 'duration': 1.0},
     {'name': 'Madison Square Garden', 'lat': 40.7505, 'lon': -73.9934, 'category': 'entertainment', 'rating': 4.5, 'popularity': 0.83, 'fee': 0, 'duration': 2.5},
-    {'name': 'Lincoln Center', 'lat': 40.7725, 'lon': -73.9835, 'category': 'cultural', 'rating': 4.6, 'popularity': 0.81, 'fee': 0, 'duration': 2.0}
+    {'name': 'Lincoln Center', 'lat': 40.7725, 'lon': -73.9835, 'category': 'cultural', 'rating': 4.6, 'popularity': 0.81, 'fee': 0, 'duration': 2.0},
+    {'name': '9/11 Memorial', 'lat': 40.7115, 'lon': -74.0134, 'category': 'landmark', 'rating': 4.8, 'popularity': 0.95, 'fee': 0, 'duration': 2.0},
+    {'name': 'Chelsea Market', 'lat': 40.7424, 'lon': -74.0061, 'category': 'market', 'rating': 4.5, 'popularity': 0.82, 'fee': 0, 'duration': 1.5},
+    {'name': 'Washington Square Park', 'lat': 40.7308, 'lon': -73.9973, 'category': 'park', 'rating': 4.5, 'popularity': 0.78, 'fee': 0, 'duration': 1.0}
 ]
 
 # NYC Subway stations (major hubs)
@@ -290,10 +293,25 @@ class NYCDataGenerator:
         """Save all generated data"""
         os.makedirs(self.output_dir, exist_ok=True)
         
+        # Convert numpy types to native Python types for JSON serialization
+        def convert_to_serializable(obj):
+            if isinstance(obj, np.integer):
+                return int(obj)
+            elif isinstance(obj, np.floating):
+                return float(obj)
+            elif isinstance(obj, np.ndarray):
+                return obj.tolist()
+            elif isinstance(obj, dict):
+                return {k: convert_to_serializable(v) for k, v in obj.items()}
+            elif isinstance(obj, list):
+                return [convert_to_serializable(item) for item in obj]
+            return obj
+        
         # Save POIs
         poi_file = os.path.join(self.output_dir, 'nyc_pois.json')
+        serializable_pois = convert_to_serializable(self.pois)
         with open(poi_file, 'w') as f:
-            json.dump(self.pois, f, indent=2)
+            json.dump(serializable_pois, f, indent=2)
         logger.info(f"Saved {len(self.pois)} POIs to {poi_file}")
         
         # Save distance matrix

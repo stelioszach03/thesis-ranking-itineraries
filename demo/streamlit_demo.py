@@ -59,6 +59,8 @@ if 'planner' not in st.session_state:
     st.session_state.updates_applied = []
     st.session_state.performance_history = []
     st.session_state.comparison_mode = False
+    st.session_state.constraints = None  # Initialize constraints
+    st.session_state.user_preferences = None  # Initialize preferences
 
 # Sidebar controls
 with st.sidebar:
@@ -104,6 +106,8 @@ with st.sidebar:
             elapsed = time.time() - start
             
             st.session_state.current_path = path
+            st.session_state.constraints = constraints  # Store constraints
+            st.session_state.user_preferences = prefs  # Store preferences
             stats = st.session_state.planner.get_statistics()
             st.session_state.performance_history.append({
                 'type': 'Initial Plan',
@@ -187,7 +191,7 @@ with col_update1:
                         
                         start = time.time()
                         comparison_path = comparison_planner.plan_with_updates(
-                            prefs, constraints
+                            st.session_state.user_preferences, st.session_state.constraints
                         )
                         full_time = time.time() - start
                         
@@ -372,7 +376,11 @@ if st.session_state.current_path:
         # Itinerary timeline
         st.subheader("📅 Timeline")
         
-        current_time = st.session_state.planner.constraints.start_time
+        # Use stored constraints or default value
+        if st.session_state.constraints:
+            current_time = st.session_state.constraints.start_time
+        else:
+            current_time = 9.0  # Default start time
         timeline_data = []
         total_cost = 0.0
         
@@ -406,7 +414,12 @@ if st.session_state.current_path:
         with col2:
             st.metric("Total Cost", f"${total_cost:.0f}")
         with col3:
-            duration = current_time - st.session_state.planner.constraints.start_time
+            # Calculate duration using stored constraints or default
+            if st.session_state.constraints:
+                start_time = st.session_state.constraints.start_time
+            else:
+                start_time = 9.0  # Default start time
+            duration = current_time - start_time
             st.metric("Duration", f"{duration:.1f}h")
 
 # Performance metrics

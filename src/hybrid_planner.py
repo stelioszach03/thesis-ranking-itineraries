@@ -28,21 +28,21 @@ import threading
 from rtree import index
 import heapq
 
-# Use relative imports for sibling modules
-from .metrics_definitions import (
+# Use absolute imports for sibling modules
+from src.metrics_definitions import (
     POI, Itinerary, QuantitativeMetrics, QualitativeMetrics,
     CompositeUtilityFunctions
 )
-from .greedy_algorithms import (
+from src.greedy_algorithms import (
     GreedyPOISelection, HeapPrunGreedyPOI, GreedyPlanner,
     Constraints, InteractiveFeedback
 )
-from .astar_itinerary import (
+from src.astar_itinerary import (
     AStarItineraryPlanner, MemoryBoundedAStarPlanner,
     ItineraryState, SearchNode, manhattan_distance_numba,
     compute_distance_matrix_numba, get_borough_id, NYC_BOROUGHS
 )
-from .lpa_star import (
+from src.lpa_star import (
     LPAStarPlanner, DynamicUpdate, UpdateType
 )
 

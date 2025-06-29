@@ -15,17 +15,17 @@ __version__ = "1.0.0"
 __author__ = "Stelios Zacharioudakis"
 __email__ = "your.email@example.com"
 
-from .metrics_definitions import (
+from src.metrics_definitions import (
     POI, Itinerary, QuantitativeMetrics, 
     QualitativeMetrics, CompositeUtilityFunctions
 )
-from .greedy_algorithms import (
+from src.greedy_algorithms import (
     GreedyPOISelection, HeapPrunGreedyPOI, 
     Constraints, InteractiveFeedback
 )
-from .astar_itinerary import AStarItineraryPlanner
-from .lpa_star import LPAStarPlanner, DynamicUpdate, UpdateType
-from .hybrid_planner import HybridItineraryPlanner
+from src.astar_itinerary import AStarItineraryPlanner
+from src.lpa_star import LPAStarPlanner, DynamicUpdate, UpdateType
+from src.hybrid_planner import HybridPlanner
 
 __all__ = [
     'POI', 'Itinerary', 'QuantitativeMetrics', 
@@ -33,5 +33,5 @@ __all__ = [
     'GreedyPOISelection', 'HeapPrunGreedyPOI',
     'Constraints', 'InteractiveFeedback',
     'AStarItineraryPlanner', 'LPAStarPlanner',
-    'DynamicUpdate', 'UpdateType', 'HybridItineraryPlanner'
+    'DynamicUpdate', 'UpdateType', 'HybridPlanner'
 ]

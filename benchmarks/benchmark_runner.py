@@ -176,8 +176,7 @@ class BenchmarkRunner:
         config = PlannerConfig(
             enable_caching=False,  # Disable for fair comparison
             enable_parallel=True,
-            enable_rtree=True,
-            random_seed=self.random_seed  # Pass seed to planner config
+            enable_rtree=True
         )
         
         self.planners = {
@@ -704,8 +703,12 @@ def main():
     
     # Generate outputs
     runner.generate_latex_tables(analysis, "benchmarks/results/benchmark_tables.tex")
-    create_interactive_dashboard(
-        results_df,
+    
+    # Save results to temporary file for dashboard generation
+    temp_results_file = "benchmarks/results/temp_results.csv"
+    results_df.to_csv(temp_results_file, index=False)
+    generate_interactive_dashboard(
+        temp_results_file,
         "benchmarks/results/interactive_dashboard.html"
     )
     

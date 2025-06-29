@@ -25,12 +25,12 @@ import gc
 from numba import njit, prange
 import networkx as nx
 
-# Use relative imports for sibling modules
-from .metrics_definitions import (
+# Use absolute imports for sibling modules
+from src.metrics_definitions import (
     POI, Itinerary, QuantitativeMetrics, QualitativeMetrics,
     CompositeUtilityFunctions
 )
-from .greedy_algorithms import Constraints, InteractiveFeedback
+from src.greedy_algorithms import Constraints, InteractiveFeedback
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)

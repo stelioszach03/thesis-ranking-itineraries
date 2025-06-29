@@ -28,7 +28,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from src.greedy_algorithms import GreedyPOISelection, HeapPrunGreedyPOI, Constraints
 from src.astar_itinerary import AStarItineraryPlanner
 from src.lpa_star import LPAStarPlanner, DynamicUpdate, UpdateType
-from src.hybrid_planner import HybridItineraryPlanner
+from src.hybrid_planner import HybridPlanner
 from src.metrics_definitions import CompositeUtilityFunctions
 
 app = Flask(__name__)
@@ -53,7 +53,7 @@ def load_nyc_data():
     ALGORITHMS['heap_greedy'] = HeapPrunGreedyPOI(NYC_POI_DATA, DISTANCE_MATRIX)
     ALGORITHMS['astar'] = AStarItineraryPlanner(NYC_POI_DATA, DISTANCE_MATRIX)
     ALGORITHMS['lpa_star'] = LPAStarPlanner(NYC_POI_DATA, DISTANCE_MATRIX)
-    ALGORITHMS['hybrid'] = HybridItineraryPlanner(NYC_POI_DATA, DISTANCE_MATRIX)
+    ALGORITHMS['hybrid'] = HybridPlanner(NYC_POI_DATA, DISTANCE_MATRIX)
 
 def create_sample_nyc_pois():
     """Create sample NYC POIs for demo"""
@@ -454,38 +454,26 @@ def format_itinerary(itinerary):
                 'total_distance': getattr(itinerary, 'total_distance', 0),
                 'total_cost': getattr(itinerary, 'total_cost', 0)
             }
-            pois_list = itinerary.pois
+            pois_list = getattr(itinerary, 'pois', [])
         
-    formatted = {
-        'pois': [],
-        'total_time': itinerary.total_time,
-        'total_distance': itinerary.total_distance,
-        'total_cost': itinerary.total_cost
-    }
-    
-    current_time = 9.0  # Start time
-    for i, poi in enumerate(itinerary.pois):
-        if i > 0:
-            travel_time = DISTANCE_MATRIX[
-                NYC_POI_DATA.index(itinerary.pois[i-1]),
-                NYC_POI_DATA.index(poi)
-            ] / 4.0  # Assume 4 km/h walking
-            current_time += travel_time
+        current_time = 9.0  # Start time
+        for i, poi in enumerate(pois_list):
+            if i > 0:
+                # Calculate travel time (simplified)
+                travel_time = 0.5  # Default 30 minutes travel
+                current_time += travel_time
+                formatted['total_distance'] += travel_time * 4.0  # km
+            
+            formatted['pois'].append({
+                'id': poi.get('id', f'poi_{i}'),
+                'name': poi.get('name', 'Unknown POI'),
+                'arrival_time': f"{int(current_time)}:{int((current_time % 1) * 60):02d}",
+                'duration': poi.get('avg_visit_duration', 1),
+                'category': poi.get('category', 'unknown')
+            })
+            
+            current_time += poi.get('avg_visit_duration', 1)
         
-        formatted['pois'].append({
-            'id': poi['id'],
-            'name': poi['name'],
-            'arrival_time': f"{int(current_time)}:{int((current_time % 1) * 60):02d}",
-            'duration': poi['avg_visit_duration'],
-            'category': poi['category']
-        })
-        
-        current_time += poi.get('avg_visit_duration', 1)
-        
-        # Update total distance
-        if i > 0:
-            formatted['total_distance'] += travel_time * 4.0  # km
-    
         return formatted
         
     except Exception as e:
