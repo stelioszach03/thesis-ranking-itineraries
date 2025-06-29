@@ -1,0 +1,46 @@
+# Random seeds for reproducible benchmarks
+# Based on research_context.md reproducibility requirements
+
+# Global seeds
+global:
+  python_random: 42
+  numpy: 42
+  torch: 42  # If using PyTorch
+  tensorflow: 42  # If using TensorFlow
+
+# Algorithm-specific seeds
+algorithms:
+  greedy:
+    selection_seed: 1337
+    shuffle_seed: 2468
+  
+  astar:
+    heuristic_seed: 3141
+    tiebreaker_seed: 2718
+  
+  lpa_star:
+    update_seed: 1618
+    propagation_seed: 1729
+
+# Scenario generation seeds
+scenarios:
+  profile_generation: 8675
+  event_selection: 3090
+  weather_assignment: 4321
+  location_selection: 5555
+
+# Data generation seeds
+data:
+  poi_generation: 9999
+  distance_matrix: 1111
+  user_profiles: 2222
+  
+# Benchmark execution seeds
+benchmarks:
+  run_order: 7777
+  parallel_workers: 8888
+  
+# Visualization seeds
+visualization:
+  color_assignment: 6666
+  layout_seed: 5432

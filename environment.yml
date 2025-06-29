@@ -1,0 +1,70 @@
+# Conda environment for NYC Itinerary Planning
+# Ensures exact reproducibility for benchmarks
+
+name: nyc-itinerary-planning
+channels:
+  - conda-forge
+  - defaults
+
+dependencies:
+  # Python version
+  - python=3.8.13
+  
+  # Core scientific computing
+  - numpy=1.21.6
+  - pandas=1.3.5
+  - scipy=1.7.3
+  - scikit-learn=1.0.2
+  
+  # Spatial libraries (conda-forge)
+  - geopandas=0.10.2
+  - shapely=1.8.5
+  - rtree=1.0.1
+  - libspatialindex=1.9.3
+  
+  # Graph and optimization
+  - networkx=2.6.3
+  
+  # Visualization
+  - matplotlib=3.5.3
+  - seaborn=0.11.2
+  - plotly=5.11.0
+  
+  # Performance
+  - numba=0.55.2
+  - cython=0.29.32
+  
+  # Development tools
+  - jupyter=1.0.0
+  - ipython=8.4.0
+  
+  # Testing
+  - pytest=7.1.3
+  - pytest-cov=3.0.0
+  
+  # System utilities
+  - psutil=5.9.4
+  
+  # Pip dependencies
+  - pip
+  - pip:
+    # OR-Tools (not in conda)
+    - ortools==9.0.9048
+    
+    # OSM data
+    - osmnx==1.1.2
+    
+    # Web framework
+    - streamlit==1.15.2
+    
+    # Additional utilities
+    - tqdm==4.64.1
+    - folium==0.12.1
+    - geopy==2.2.0
+    - pulp==2.6.0
+    
+    # Development
+    - black==22.10.0
+    - flake8==5.0.4
+    - mypy==0.991
+    - pre-commit==2.20.0

@@ -1,0 +1,94 @@
+{
+  "scenario_id": "US_MUSEUM_01",
+  "name": "Museum Lover's Day",
+  "description": "Plan a museum-focused day in NYC for an art and history enthusiast",
+  "narrative": "You are planning a day in New York City focused on museums. You love both art and history, and want to see world-class collections. You prefer a moderate pace with time to truly appreciate the exhibits.",
+  
+  "constraints": {
+    "start_time": "10:00",
+    "end_time": "18:00",
+    "start_location": "Times Square Hotel",
+    "end_location": "Times Square Hotel",
+    "duration_hours": 8,
+    "budget": 150,
+    "walking_limit_km": 5
+  },
+  
+  "preferences": {
+    "categories": {
+      "museum": 0.9,
+      "art_gallery": 0.8,
+      "cultural_site": 0.7,
+      "restaurant": 0.3,
+      "cafe": 0.4
+    },
+    "pace": "moderate",
+    "group_type": "solo",
+    "interests": ["art", "history", "culture", "architecture"]
+  },
+  
+  "must_see_pois": [
+    "Metropolitan Museum of Art",
+    "Museum of Modern Art (MoMA)"
+  ],
+  
+  "avoid_pois": [],
+  
+  "special_requirements": {
+    "lunch_break": true,
+    "rest_breaks": true,
+    "indoor_only": false
+  },
+  
+  "evaluation_criteria": {
+    "expected_pois": 4,
+    "acceptable_range": [3, 5],
+    "critical_categories": ["museum", "art_gallery"],
+    "success_metrics": {
+      "must_include_major_museum": true,
+      "variety_of_museum_types": true,
+      "reasonable_distances": true,
+      "time_per_museum_min": 90
+    }
+  },
+  
+  "baseline_itinerary": {
+    "stops": [
+      {
+        "poi": "Metropolitan Museum of Art",
+        "arrival": "10:00",
+        "duration": 180,
+        "notes": "World's largest art museum"
+      },
+      {
+        "poi": "Lunch at Museum Cafeteria",
+        "arrival": "13:00",
+        "duration": 60,
+        "notes": "Convenient on-site dining"
+      },
+      {
+        "poi": "Guggenheim Museum",
+        "arrival": "14:30",
+        "duration": 90,
+        "notes": "Iconic architecture and modern art"
+      },
+      {
+        "poi": "Cooper Hewitt Design Museum",
+        "arrival": "16:30",
+        "duration": 90,
+        "notes": "Interactive design exhibits"
+      }
+    ],
+    "total_distance_km": 3.2,
+    "total_cost": 95,
+    "satisfaction_score": 0.85
+  },
+  
+  "task_instructions": "Plan a museum-focused day starting and ending at a Times Square hotel. Include 3-5 museums with enough time to properly explore each one. Consider including a lunch break and the distances between museums.",
+  
+  "think_aloud_prompts": [
+    "How are you deciding which museums to include?",
+    "What factors influence the order of visits?",
+    "How do you balance variety with travel time?"
+  ]
+}

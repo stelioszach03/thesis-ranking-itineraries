@@ -1,0 +1,211 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# PyInstaller
+*.manifest
+*.spec
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# IPython
+profile_default/
+ipython_config.py
+
+# pyenv
+.python-version
+
+# pipenv
+Pipfile.lock
+
+# PEP 582
+__pypackages__/
+
+# Celery
+celerybeat-schedule
+celerybeat.pid
+
+# SageMath parsed files
+*.sage.py
+
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Spyder project settings
+.spyderproject
+.spyproject
+
+# Rope project settings
+.ropeproject
+
+# mkdocs documentation
+/site
+
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Pyre type checker
+.pyre/
+
+# IDE specific files
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS specific files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# LaTeX temporary files
+*.aux
+*.lof
+*.log
+*.lot
+*.fls
+*.out
+*.toc
+*.fmt
+*.fot
+*.cb
+*.cb2
+.*.lb
+*.bbl
+*.bcf
+*.blg
+*-blx.aux
+*-blx.bib
+*.run.xml
+*.fdb_latexmk
+*.synctex
+*.synctex(busy)
+*.synctex.gz
+*.synctex.gz(busy)
+*.pdfsync
+
+# Data files (too large for git)
+data/nyc_data/*.json
+data/nyc_data/*.csv
+data/nyc_data/*.npy
+data/nyc_data/*.pkl
+data/nyc_data/*.h5
+
+# Generated figures
+thesis/figures/*.pdf
+thesis/figures/*.png
+thesis/figures/*.jpg
+thesis/figures/*.eps
+
+# Benchmark results
+benchmarks/results/*.json
+benchmarks/results/*.csv
+benchmarks/results/*.html
+
+# User study data (privacy)
+user_study/responses/
+user_study/recordings/
+user_study/analysis/raw_data/
+
+# Temporary files
+*.tmp
+*.bak
+*.swp
+*~
+
+# Streamlit
+.streamlit/
+
+# Flask
+instance/
+.webassets-cache
+
+# Logs
+*.log
+logs/
+
+# Database
+*.db
+*.sqlite
+
+# Models and weights
+*.h5
+*.pkl
+*.pth
+*.ckpt
+
+# Credentials and secrets
+*.pem
+*.key
+secrets.json
+credentials.json
+
+# Output files
+output/
+results/
+
+# Cache directories
+.cache/
+__pycache__/
+
+# Documentation build
+docs/_build/
+docs/_static/
+docs/_templates/

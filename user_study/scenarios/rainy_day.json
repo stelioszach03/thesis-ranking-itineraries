@@ -1,0 +1,105 @@
+{
+  "scenario_id": "US_RAINY_05",
+  "name": "Rainy Day in Manhattan",
+  "description": "Plan an enjoyable day in NYC despite rainy weather",
+  "narrative": "The weather forecast shows rain all day, but you don't want to waste your precious time in NYC. You need indoor activities that are still quintessentially New York. You have an umbrella but prefer to minimize time outdoors.",
+  
+  "constraints": {
+    "start_time": "11:00",
+    "end_time": "19:00",
+    "start_location": "Grand Central Area Hotel",
+    "end_location": "Grand Central Area Hotel",
+    "duration_hours": 8,
+    "budget": 120,
+    "walking_limit_km": 3
+  },
+  
+  "preferences": {
+    "categories": {
+      "museum": 0.8,
+      "indoor_market": 0.9,
+      "shopping": 0.6,
+      "restaurant": 0.7,
+      "indoor_attraction": 0.9,
+      "theater": 0.5
+    },
+    "pace": "relaxed",
+    "group_type": "couple",
+    "interests": ["culture", "food", "architecture", "shopping"]
+  },
+  
+  "must_see_pois": [
+    "Grand Central Terminal"
+  ],
+  
+  "avoid_pois": [
+    "Outdoor attractions",
+    "Parks",
+    "Walking tours"
+  ],
+  
+  "special_requirements": {
+    "indoor_only": true,
+    "covered_walkways_preferred": true,
+    "subway_accessible": true,
+    "rain_contingency": true
+  },
+  
+  "evaluation_criteria": {
+    "expected_pois": 5,
+    "acceptable_range": [4, 6],
+    "critical_categories": ["indoor_attraction", "indoor_market"],
+    "success_metrics": {
+      "minimal_outdoor_exposure": true,
+      "connected_venues": true,
+      "variety_despite_weather": true,
+      "mood_lifting_activities": true
+    }
+  },
+  
+  "baseline_itinerary": {
+    "stops": [
+      {
+        "poi": "Grand Central Terminal",
+        "arrival": "11:00",
+        "duration": 60,
+        "notes": "Architecture and market"
+      },
+      {
+        "poi": "New York Public Library",
+        "arrival": "12:15",
+        "duration": 75,
+        "notes": "Beautiful interiors, free"
+      },
+      {
+        "poi": "Bryant Park Grill",
+        "arrival": "13:45",
+        "duration": 75,
+        "notes": "Lunch with park views"
+      },
+      {
+        "poi": "Times Square & Broadway Shops",
+        "arrival": "15:15",
+        "duration": 90,
+        "notes": "Indoor shopping and sights"
+      },
+      {
+        "poi": "Rockefeller Center",
+        "arrival": "17:00",
+        "duration": 90,
+        "notes": "Underground concourse, Top of Rock"
+      }
+    ],
+    "total_distance_km": 2.8,
+    "total_cost": 85,
+    "satisfaction_score": 0.79
+  },
+  
+  "task_instructions": "Plan a rainy day itinerary with mostly indoor activities. Start at Grand Central Terminal and focus on attractions that minimize time in the rain. Consider connected buildings, underground passages, and subway accessibility.",
+  
+  "think_aloud_prompts": [
+    "How are you minimizing exposure to rain between venues?",
+    "What indoor activities still feel uniquely NYC?",
+    "Are you considering the mood impact of rainy weather?"
+  ]
+}

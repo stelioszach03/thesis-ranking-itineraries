@@ -1,0 +1,107 @@
+{
+  "scenario_id": "US_ACCESS_06",
+  "name": "Accessible NYC Experience",
+  "description": "Plan a wheelchair-accessible day exploring NYC's highlights",
+  "narrative": "You're exploring NYC with a wheelchair user and want to ensure all attractions, restaurants, and transportation are fully accessible. You want to see major sights without accessibility being a constant concern.",
+  
+  "constraints": {
+    "start_time": "10:00",
+    "end_time": "17:00",
+    "start_location": "Accessible Times Square Hotel",
+    "end_location": "Accessible Times Square Hotel",
+    "duration_hours": 7,
+    "budget": 150,
+    "walking_limit_km": 4
+  },
+  
+  "preferences": {
+    "categories": {
+      "accessible_attraction": 1.0,
+      "museum": 0.7,
+      "park": 0.6,
+      "restaurant": 0.7,
+      "landmark": 0.8,
+      "accessible_transport": 0.9
+    },
+    "pace": "relaxed",
+    "group_type": "couple",
+    "interests": ["culture", "history", "food", "photography"]
+  },
+  
+  "must_see_pois": [
+    "One World Observatory",
+    "9/11 Memorial"
+  ],
+  
+  "avoid_pois": [
+    "Venues with stairs only",
+    "Historic buildings without elevators",
+    "Crowded narrow spaces"
+  ],
+  
+  "special_requirements": {
+    "wheelchair_accessible": true,
+    "accessible_restrooms": true,
+    "elevator_access": true,
+    "wide_pathways": true,
+    "accessible_dining": true
+  },
+  
+  "evaluation_criteria": {
+    "expected_pois": 5,
+    "acceptable_range": [4, 6],
+    "critical_categories": ["accessible_attraction"],
+    "success_metrics": {
+      "fully_accessible_route": true,
+      "accessible_transport_between": true,
+      "quality_experience": true,
+      "no_accessibility_compromises": true
+    }
+  },
+  
+  "baseline_itinerary": {
+    "stops": [
+      {
+        "poi": "One World Observatory",
+        "arrival": "10:00",
+        "duration": 90,
+        "notes": "Fully accessible, advance tickets"
+      },
+      {
+        "poi": "9/11 Memorial",
+        "arrival": "11:45",
+        "duration": 60,
+        "notes": "Wheelchair accessible paths"
+      },
+      {
+        "poi": "Brookfield Place",
+        "arrival": "13:00",
+        "duration": 75,
+        "notes": "Accessible food court and shops"
+      },
+      {
+        "poi": "Statue of Liberty Ferry",
+        "arrival": "14:30",
+        "duration": 120,
+        "notes": "Wheelchair accessible ferry"
+      },
+      {
+        "poi": "South Street Seaport",
+        "arrival": "16:45",
+        "duration": 45,
+        "notes": "Level boardwalk, accessible shops"
+      }
+    ],
+    "total_distance_km": 3.5,
+    "total_cost": 95,
+    "satisfaction_score": 0.83
+  },
+  
+  "task_instructions": "Plan a fully wheelchair-accessible day including One World Observatory and the 9/11 Memorial. Ensure all venues, restaurants, and transportation are wheelchair accessible. Consider elevator availability, accessible restrooms, and avoiding crowded spaces.",
+  
+  "think_aloud_prompts": [
+    "How are you verifying accessibility for each venue?",
+    "What's your strategy for accessible transportation?",
+    "How do you balance accessibility with experiencing NYC highlights?"
+  ]
+}

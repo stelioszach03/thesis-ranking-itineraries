@@ -1,0 +1,105 @@
+{
+  "scenario_id": "US_FAMILY_03",
+  "name": "Family Fun Day",
+  "description": "Plan a day in NYC suitable for a family with children ages 8 and 12",
+  "narrative": "You're visiting NYC with your two children (ages 8 and 12). You want a mix of educational and fun activities that will keep everyone engaged. The kids have lots of energy but will need food breaks.",
+  
+  "constraints": {
+    "start_time": "09:00",
+    "end_time": "17:00",
+    "start_location": "Upper West Side Hotel",
+    "end_location": "Upper West Side Hotel",
+    "duration_hours": 8,
+    "budget": 200,
+    "walking_limit_km": 4
+  },
+  
+  "preferences": {
+    "categories": {
+      "museum": 0.7,
+      "park": 0.8,
+      "family_activity": 0.9,
+      "restaurant": 0.5,
+      "educational": 0.6,
+      "playground": 0.7
+    },
+    "pace": "moderate",
+    "group_type": "family",
+    "interests": ["science", "nature", "interactive", "educational"]
+  },
+  
+  "must_see_pois": [
+    "American Museum of Natural History"
+  ],
+  
+  "avoid_pois": [
+    "Bars",
+    "Nightclubs",
+    "Art galleries with fragile items"
+  ],
+  
+  "special_requirements": {
+    "child_friendly": true,
+    "restroom_access": true,
+    "stroller_accessible": false,
+    "interactive_exhibits": true
+  },
+  
+  "evaluation_criteria": {
+    "expected_pois": 5,
+    "acceptable_range": [4, 6],
+    "critical_categories": ["family_activity", "park"],
+    "success_metrics": {
+      "age_appropriate": true,
+      "variety_of_activities": true,
+      "outdoor_time": true,
+      "educational_value": true
+    }
+  },
+  
+  "baseline_itinerary": {
+    "stops": [
+      {
+        "poi": "American Museum of Natural History",
+        "arrival": "09:00",
+        "duration": 180,
+        "notes": "Dinosaurs and planetarium"
+      },
+      {
+        "poi": "Shake Shack",
+        "arrival": "12:00",
+        "duration": 60,
+        "notes": "Kid-friendly lunch"
+      },
+      {
+        "poi": "Central Park Playground",
+        "arrival": "13:30",
+        "duration": 90,
+        "notes": "Let kids burn energy"
+      },
+      {
+        "poi": "Central Park Zoo",
+        "arrival": "15:00",
+        "duration": 90,
+        "notes": "Small, manageable zoo"
+      },
+      {
+        "poi": "Dylan's Candy Bar",
+        "arrival": "16:45",
+        "duration": 30,
+        "notes": "Sweet ending to the day"
+      }
+    ],
+    "total_distance_km": 3.5,
+    "total_cost": 140,
+    "satisfaction_score": 0.87
+  },
+  
+  "task_instructions": "Plan a family-friendly day with two children (ages 8 and 12). Include a mix of educational and fun activities. The day should include the American Museum of Natural History and have appropriate meal breaks. Keep walking distances reasonable for children.",
+  
+  "think_aloud_prompts": [
+    "How are you ensuring activities are age-appropriate?",
+    "What's your strategy for keeping kids engaged throughout the day?",
+    "How do you balance educational content with fun?"
+  ]
+}

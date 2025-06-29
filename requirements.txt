@@ -1,0 +1,57 @@
+# NYC Itinerary Planning - Python Requirements
+# Pin versions for reproducibility as per research_context.md
+
+# Core dependencies
+numpy==1.21.6
+pandas==1.3.5
+scipy==1.7.3
+scikit-learn==1.0.2
+
+# Graph algorithms
+networkx==2.6.3
+
+# Optimization
+ortools==9.0.9048
+pulp==2.6.0
+
+# Spatial indexing
+rtree==1.0.1
+shapely==1.8.5
+geopandas==0.10.2
+
+# Mapping and routing
+osmnx==1.1.2
+folium==0.12.1
+geopy==2.2.0
+
+# Performance optimization
+numba==0.55.2
+joblib==1.1.0
+
+# Visualization
+matplotlib==3.5.3
+seaborn==0.11.2
+plotly==5.11.0
+
+# Web framework for demo
+streamlit==1.15.2
+
+# Testing
+pytest==7.1.3
+pytest-cov==3.0.0
+
+# Utilities
+tqdm==4.64.1
+python-dateutil==2.8.2
+pytz==2022.6
+psutil==5.9.4
+
+# Documentation
+sphinx==4.5.0
+sphinx-rtd-theme==1.0.0
+
+# Development
+black==22.10.0
+flake8==5.0.4
+mypy==0.991
+pre-commit==2.20.0

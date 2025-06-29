@@ -1,0 +1,112 @@
+{
+  "scenario_id": "US_BUDGET_04",
+  "name": "NYC on a Budget",
+  "description": "Experience the best of NYC while keeping costs low",
+  "narrative": "You're a budget-conscious traveler who wants to experience NYC without breaking the bank. You're interested in free and low-cost attractions but still want an authentic NYC experience.",
+  
+  "constraints": {
+    "start_time": "10:00",
+    "end_time": "18:00",
+    "start_location": "Brooklyn Hostel",
+    "end_location": "Brooklyn Hostel",
+    "duration_hours": 8,
+    "budget": 50,
+    "walking_limit_km": 8
+  },
+  
+  "preferences": {
+    "categories": {
+      "free_attraction": 0.9,
+      "park": 0.8,
+      "market": 0.7,
+      "street_food": 0.8,
+      "public_art": 0.7,
+      "viewpoint": 0.8
+    },
+    "pace": "active",
+    "group_type": "solo",
+    "interests": ["culture", "local_life", "photography", "architecture"]
+  },
+  
+  "must_see_pois": [
+    "Brooklyn Bridge",
+    "Central Park"
+  ],
+  
+  "avoid_pois": [
+    "Expensive restaurants",
+    "Paid museums",
+    "Tourist traps"
+  ],
+  
+  "special_requirements": {
+    "free_only": false,
+    "low_cost_priority": true,
+    "local_experiences": true,
+    "public_transport_ok": true
+  },
+  
+  "evaluation_criteria": {
+    "expected_pois": 6,
+    "acceptable_range": [5, 7],
+    "critical_categories": ["free_attraction", "park"],
+    "success_metrics": {
+      "total_cost_under_budget": true,
+      "authentic_experiences": true,
+      "variety_of_neighborhoods": true,
+      "instagram_worthy": true
+    }
+  },
+  
+  "baseline_itinerary": {
+    "stops": [
+      {
+        "poi": "Brooklyn Bridge Walk",
+        "arrival": "10:00",
+        "duration": 60,
+        "notes": "Free iconic experience"
+      },
+      {
+        "poi": "City Hall Park",
+        "arrival": "11:15",
+        "duration": 30,
+        "notes": "Historic area exploration"
+      },
+      {
+        "poi": "Stone Street Historic District",
+        "arrival": "12:00",
+        "duration": 45,
+        "notes": "Cobblestone streets, food trucks"
+      },
+      {
+        "poi": "Staten Island Ferry",
+        "arrival": "13:00",
+        "duration": 60,
+        "notes": "Free Statue of Liberty views"
+      },
+      {
+        "poi": "High Line Park",
+        "arrival": "14:30",
+        "duration": 90,
+        "notes": "Elevated park, free entry"
+      },
+      {
+        "poi": "Chelsea Market",
+        "arrival": "16:15",
+        "duration": 75,
+        "notes": "Food hall, free to browse"
+      }
+    ],
+    "total_distance_km": 7.8,
+    "total_cost": 25,
+    "satisfaction_score": 0.82
+  },
+  
+  "task_instructions": "Plan a budget-friendly day exploring NYC with no more than $50 to spend. Include the Brooklyn Bridge and Central Park. Focus on free or low-cost attractions that still provide an authentic NYC experience. Consider food costs in your planning.",
+  
+  "think_aloud_prompts": [
+    "How are you prioritizing free vs low-cost attractions?",
+    "What strategies are you using to minimize transportation costs?",
+    "How do you ensure an authentic experience on a budget?"
+  ]
+}

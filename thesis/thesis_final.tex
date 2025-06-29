@@ -1,0 +1,241 @@
+\documentclass[12pt,a4paper,twoside]{report}
+
+% NKUA Thesis Requirements
+\usepackage[utf8]{inputenc}
+\usepackage[greek,english]{babel}
+\usepackage{fontspec}
+\setmainfont{Times New Roman}
+\usepackage[top=2.5cm,bottom=2.5cm,left=3cm,right=2.5cm]{geometry}
+
+% Essential packages
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{graphicx}
+\usepackage{algorithm}
+\usepackage{algorithmic}
+\usepackage{listings}
+\usepackage{hyperref}
+\usepackage{multirow}
+\usepackage{booktabs}
+\usepackage{float}
+\usepackage{subcaption}
+\usepackage{setspace}
+\usepackage{csquotes}
+\usepackage[backend=biber,style=ieee]{biblatex}
+\addbibresource{bibliography.bib}
+
+% Code listing style
+\lstset{
+    basicstyle=\ttfamily\small,
+    breaklines=true,
+    keywordstyle=\color{blue},
+    commentstyle=\color{gray},
+    numbers=left,
+    numberstyle=\tiny,
+    stepnumber=1,
+    numbersep=5pt,
+    backgroundcolor=\color{lightgray!10},
+    showspaces=false,
+    showstringspaces=false,
+    showtabs=false,
+    frame=single,
+    tabsize=2,
+    captionpos=b,
+    breakatwhitespace=false,
+    escapeinside={(*@}{@*)},
+    language=Python
+}
+
+% Theorem environments
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}[chapter]
+\newtheorem{theorem}{Theorem}[chapter]
+\newtheorem{lemma}{Lemma}[chapter]
+\newtheorem{proposition}{Proposition}[chapter]
+
+% Line spacing
+\onehalfspacing
+
+\begin{document}
+
+% Title page
+\begin{titlepage}
+    \centering
+    \includegraphics[width=0.3\textwidth]{nkua_logo.png} % Add NKUA logo
+    
+    \vspace{1cm}
+    
+    {\Large \textbf{NATIONAL AND KAPODISTRIAN UNIVERSITY OF ATHENS}}\\
+    \vspace{0.5cm}
+    {\large School of Sciences\\
+    Department of Informatics and Telecommunications}\\
+    \vspace{2cm}
+    
+    {\Large \textbf{MASTER'S THESIS}}\\
+    \vspace{2cm}
+    
+    {\huge \textbf{Ranking Itineraries:\\Dynamic Algorithms Meet User Preferences}}\\
+    \vspace{1cm}
+    {\Large \textgreek{Βαθμονόμηση Δρομολογίων:\\Δυναμικοί Αλγόριθμοι και Προτιμήσεις Χρηστών}}\\
+    
+    \vspace{2cm}
+    
+    {\Large \textbf{Stelios Zacharioudakis}}\\
+    \vspace{0.5cm}
+    {\large Registration Number: [TO BE ASSIGNED]}\\
+    
+    \vspace{3cm}
+    
+    {\large \textbf{Supervisor:} [To be confirmed]}\\
+    {\small (Note: Prof. Dimitrios Gounopoulos is not affiliated with NKUA's Department of Informatics \& Telecommunications)}\\
+    
+    \vspace{2cm}
+    
+    {\large Athens\\
+    June 2025}
+\end{titlepage}
+
+% Abstract page
+\newpage
+\thispagestyle{empty}
+\section*{Abstract}
+
+This thesis presents a novel approach to tourist itinerary planning that shifts from traditional coverage maximization to quality-based ranking through dynamic algorithms. We develop a hybrid algorithmic framework combining greedy heuristics, A* search with admissible heuristics, and Lifelong Planning A* (LPA*) for real-time adaptation. Implemented and evaluated on New York City with 10,847 points of interest, our system achieves 87.5\% task success rate on complex constraints compared to 0.6\% for state-of-the-art language models. The greedy algorithms, enhanced with Numba optimization, provide 4.3x speedup while maintaining O(n²) complexity. LPA* enables 70-90\% computation reuse for dynamic updates such as weather changes or transit disruptions. User studies with 30 participants validate the preference for 3-7 POIs per day and confirm our Composite Satisfaction Score weights (0.35 attractiveness, 0.25 time efficiency, 0.25 feasibility, 0.15 diversity). The practical impact includes sub-second response times for typical queries, 81.7\% reduction in planning time, and successful deployment potential for urban tourism applications. This work contributes fundamental advances in interactive trip planning, multi-criteria optimization, and dynamic adaptation for real-world constraints.
+
+\textbf{Keywords:} itinerary planning, dynamic algorithms, user preferences, multi-criteria ranking, tourism informatics
+
+\newpage
+\thispagestyle{empty}
+\selectlanguage{greek}
+\section*{Περίληψη}
+
+Η παρούσα διπλωματική εργασία παρουσιάζει μια καινοτόμο προσέγγιση για τον σχεδιασμό τουριστικών δρομολογίων που μετατοπίζει το ενδιαφέρον από την παραδοσιακή μεγιστοποίηση κάλυψης στη βαθμονόμηση βάσει ποιότητας μέσω δυναμικών αλγορίθμων. Αναπτύσσουμε ένα υβριδικό αλγοριθμικό πλαίσιο που συνδυάζει άπληστες ευρετικές μεθόδους, αναζήτηση A* με αποδεκτές ευρετικές συναρτήσεις, και τον αλγόριθμο Lifelong Planning A* (LPA*) για προσαρμογή σε πραγματικό χρόνο. Υλοποιημένο και αξιολογημένο στη Νέα Υόρκη με 10.847 σημεία ενδιαφέροντος, το σύστημά μας επιτυγχάνει ποσοστό επιτυχίας 87,5\% σε σύνθετους περιορισμούς συγκριτικά με 0,6\% των σύγχρονων γλωσσικών μοντέλων. Οι άπληστοι αλγόριθμοι, ενισχυμένοι με βελτιστοποίηση Numba, παρέχουν επιτάχυνση 4,3x διατηρώντας πολυπλοκότητα O(n²). Ο LPA* επιτρέπει επαναχρησιμοποίηση υπολογισμών 70-90\% για δυναμικές ενημερώσεις όπως αλλαγές καιρού ή διακοπές συγκοινωνιών. Μελέτες χρηστών με 30 συμμετέχοντες επικυρώνουν την προτίμηση για 3-7 σημεία ενδιαφέροντος ανά ημέρα και επιβεβαιώνουν τα βάρη του Σύνθετου Δείκτη Ικανοποίησης (0,35 ελκυστικότητα, 0,25 χρονική αποδοτικότητα, 0,25 εφικτότητα, 0,15 ποικιλομορφία). Ο πρακτικός αντίκτυπος περιλαμβάνει χρόνους απόκρισης κάτω του δευτερολέπτου για τυπικά ερωτήματα, μείωση 81,7\% στον χρόνο σχεδιασμού, και επιτυχή δυνατότητα ανάπτυξης για εφαρμογές αστικού τουρισμού. Η εργασία αυτή συνεισφέρει θεμελιώδεις προόδους στον διαδραστικό σχεδιασμό ταξιδιών, την πολυκριτηριακή βελτιστοποίηση, και τη δυναμική προσαρμογή σε πραγματικούς περιορισμούς.
+
+\textbf{Λέξεις κλειδιά:} βαθμονόμηση δρομολογίων, δυναμικοί αλγόριθμοι, προτιμήσεις χρηστών, πολυκριτηριακή κατάταξη, πληροφορική τουρισμού
+
+\selectlanguage{english}
+
+% Acknowledgments
+\chapter*{Acknowledgments}
+\addcontentsline{toc}{chapter}{Acknowledgments}
+
+I would like to express my sincere gratitude to all those who contributed to the completion of this Master's thesis.
+
+First and foremost, I thank my supervisor [to be determined] for their guidance throughout this research. Note that while Prof. Dimitrios Gounopoulos was initially mentioned, he is not affiliated with NKUA's Department of Informatics \& Telecommunications, and the appropriate supervisor from the department will be assigned.
+
+I am grateful to the National and Kapodistrian University of Athens, Department of Informatics and Telecommunications, for providing the academic environment and resources necessary for this research.
+
+Special thanks to the 30 participants who volunteered their time for the user study, providing invaluable insights into tourist preferences and system usability.
+
+I acknowledge the open data providers, including OpenStreetMap contributors and NYC Open Data, whose datasets made the large-scale evaluation possible.
+
+Finally, I thank my family and friends for their continuous support and encouragement throughout my studies.
+
+This thesis represents 16 ECTS credits, equivalent to two compulsory courses, as per the department's requirements.
+
+% Table of Contents
+\tableofcontents
+\listoffigures
+\listoftables
+\listofalgorithms
+
+% Main content
+\chapter{Introduction}
+\input{chapters/01_intro}
+
+\chapter{Literature Review}
+\input{chapters/02_literature}
+
+\chapter{Methods}
+\input{chapters/03_methods}
+
+\chapter{Implementation}
+\input{chapters/04_implementation}
+
+\chapter{Results}
+\input{chapters/05_results}
+
+\chapter{Discussion}
+\input{chapters/06_discussion}
+
+\chapter{Conclusions and Future Work}
+\section{Summary of Contributions}
+This thesis makes four key contributions to the field of tourist itinerary planning:
+
+\subsection{Algorithmic Innovation}
+We developed a hybrid framework that combines the efficiency of greedy algorithms with the optimality guarantees of A* search and the dynamic adaptability of LPA*. The two-phase approach (greedy selection followed by optimal routing) achieves 96\% of optimal quality at 1.5\% of the computational cost.
+
+\subsection{Quality-Based Ranking Framework}
+Moving beyond traditional coverage maximization, we introduced the Composite Satisfaction Score (CSS) that balances attractiveness (0.35), time efficiency (0.25), feasibility (0.25), and diversity (0.15). This multi-criteria approach better reflects real tourist preferences.
+
+\subsection{Real-World Validation}
+Through extensive evaluation on New York City with 10,847 POIs, we demonstrated practical scalability and performance. The system maintains sub-second response times for queries up to 1,000 POIs while achieving 87.5\% success rate on complex constraints.
+
+\subsection{Dynamic Adaptation Capability}
+LPA* integration enables real-time replanning with 70-90\% computation reuse, making the system responsive to weather changes, transit disruptions, and POI availability updates common in urban environments.
+
+\section{Practical Impact}
+The research has immediate applications for:
+\begin{itemize}
+    \item Tourism mobile applications requiring real-time performance
+    \item City tourism boards seeking to distribute visitor traffic
+    \item Travel planning platforms needing reliable constraint satisfaction
+    \item Accessibility-focused services requiring dynamic adaptation
+\end{itemize}
+
+\section{Future Research Directions}
+Several promising avenues extend this work:
+\begin{itemize}
+    \item Graph Neural Networks for learning POI relationships
+    \item Transformer architectures for sequential preference modeling
+    \item Federated learning for privacy-preserving personalization
+    \item Multi-modal integration combining visual, textual, and sensor data
+    \item Sustainability metrics to address overtourism
+\end{itemize}
+
+\section{Closing Remarks}
+This thesis demonstrates that quality-based ranking with dynamic algorithms can transform urban tourism planning. By prioritizing user satisfaction over simple coverage and enabling real-time adaptation, we help tourists discover meaningful experiences rather than merely visiting attractions. The work establishes a foundation for next-generation tourism technology that is responsive, personalized, and practically deployable.
+
+% Bibliography
+\printbibliography[heading=bibintoc,title={References}]
+
+% Appendices
+\appendix
+
+\chapter{Algorithm Implementations}
+\section{Greedy Algorithm with Quality Metrics}
+\lstinputlisting[language=Python,caption={Quality-aware greedy POI selection}]{code/greedy_core.py}
+
+\section{A* Search with Admissible Heuristics}
+\lstinputlisting[language=Python,caption={A* implementation for itinerary planning}]{code/astar_core.py}
+
+\section{LPA* for Dynamic Updates}
+\lstinputlisting[language=Python,caption={Lifelong Planning A* for real-time adaptation}]{code/lpa_core.py}
+
+\chapter{Evaluation Data}
+\section{NYC Tourist Profiles}
+The 8 tourist profiles used in evaluation:
+\begin{enumerate}
+    \item Art Enthusiast: museum (0.9), gallery (0.8), cultural (0.7)
+    \item Family with Children: family\_friendly (0.9), park (0.8), educational (0.7)
+    \item Food Lover: restaurant (0.9), market (0.8), culinary\_experience (0.7)
+    \item Budget Traveler: free\_attraction (0.9), park (0.8), cost\_sensitivity (high)
+    \item Luxury Seeker: premium (0.9), exclusive (0.8), fine\_dining (0.7)
+    \item Active Explorer: outdoor (0.9), walking\_tour (0.8), sports (0.6)
+    \item Culture Buff: historical (0.9), museum (0.8), cultural\_site (0.7)
+    \item Nightlife Enthusiast: bar (0.8), entertainment (0.9), late\_night (0.8)
+\end{enumerate}
+
+\section{Statistical Analysis Results}
+Detailed statistical test results and effect sizes are available in the supplementary materials.
+
+\chapter{User Study Materials}
+\section{Consent Form}
+[Include the consent form from user\_study/ethics/consent\_form.md]
+
+\section{Questionnaires}
+[Include pre-study and post-study questionnaires]
+
+\section{Interview Guide}
+[Include semi-structured interview questions]
+
+\end{document}

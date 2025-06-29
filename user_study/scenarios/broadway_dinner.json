@@ -1,0 +1,97 @@
+{
+  "scenario_id": "US_BROADWAY_02",
+  "name": "Broadway Night Out",
+  "description": "Plan an evening in NYC including a Broadway show and nice dinner",
+  "narrative": "You have tickets to see 'The Lion King' on Broadway at 8:00 PM. You want to have a memorable dinner before the show and perhaps grab drinks afterward. You're celebrating a special occasion and want everything to be perfect.",
+  
+  "constraints": {
+    "start_time": "17:00",
+    "end_time": "23:00",
+    "start_location": "Midtown Hotel",
+    "end_location": "Midtown Hotel",
+    "duration_hours": 6,
+    "budget": 300,
+    "walking_limit_km": 3
+  },
+  
+  "preferences": {
+    "categories": {
+      "restaurant": 0.9,
+      "theater": 1.0,
+      "bar": 0.7,
+      "landmark": 0.4,
+      "entertainment": 0.6
+    },
+    "pace": "relaxed",
+    "group_type": "couple",
+    "interests": ["theater", "fine_dining", "nightlife", "culture"]
+  },
+  
+  "must_see_pois": [
+    "Minskoff Theatre (The Lion King)"
+  ],
+  
+  "avoid_pois": [
+    "Fast food restaurants",
+    "Chain restaurants"
+  ],
+  
+  "special_requirements": {
+    "show_time": "20:00",
+    "show_duration": 150,
+    "dinner_reservation_needed": true,
+    "dietary_preferences": ["vegetarian_options"]
+  },
+  
+  "evaluation_criteria": {
+    "expected_pois": 4,
+    "acceptable_range": [3, 5],
+    "critical_categories": ["restaurant", "theater"],
+    "success_metrics": {
+      "dinner_before_show": true,
+      "appropriate_timing": true,
+      "walking_distance_to_theater": true,
+      "quality_establishments": true
+    }
+  },
+  
+  "baseline_itinerary": {
+    "stops": [
+      {
+        "poi": "Times Square Walk",
+        "arrival": "17:00",
+        "duration": 30,
+        "notes": "Soak in the atmosphere"
+      },
+      {
+        "poi": "Joe Allen Restaurant",
+        "arrival": "17:45",
+        "duration": 90,
+        "notes": "Classic pre-theater dining"
+      },
+      {
+        "poi": "Minskoff Theatre",
+        "arrival": "19:30",
+        "duration": 180,
+        "notes": "The Lion King show"
+      },
+      {
+        "poi": "The Press Lounge",
+        "arrival": "22:45",
+        "duration": 60,
+        "notes": "Rooftop drinks with views"
+      }
+    ],
+    "total_distance_km": 2.1,
+    "total_cost": 280,
+    "satisfaction_score": 0.88
+  },
+  
+  "task_instructions": "Plan an evening that includes dinner and a Broadway show (The Lion King at 8 PM). The show is at the Minskoff Theatre and lasts 2.5 hours. Make sure to allow enough time for a nice dinner before the show, and consider options for after-show drinks.",
+  
+  "think_aloud_prompts": [
+    "How are you timing the dinner to ensure you make the show?",
+    "What makes a restaurant suitable for pre-theater dining?",
+    "Are you considering the atmosphere and special occasion aspect?"
+  ]
+}
