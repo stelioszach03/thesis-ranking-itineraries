@@ -104,5 +104,5 @@ Demo applications additionally need:
 When using this code, please cite:
 ```
 Zacharioudakis, S. (2025). Ranking Itineraries: Dynamic Algorithms Meet User Preferences. 
-Master's Thesis, National and Kapodistrian University of Athens.
+Bachelor's Thesis, National and Kapodistrian University of Athens.
 ```

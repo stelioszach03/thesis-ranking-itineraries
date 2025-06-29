@@ -14,7 +14,7 @@ date: "2025-06-29"
 
 **University:** National and Kapodistrian University of Athens (NKUA), Department of Informatics & Telecommunications
 
-**Supervisor:** To be confirmed (Note: Prof. Dimitrios Gounopoulos is not affiliated with NKUA's Department of Informatics & Telecommunications)
+**Supervisor:** Prof. Dimitrios Gounopoulos
 
 **Motivation:** Recent work by Basu Roy et al. [1] attempts to propose itineraries to users based on specific interests. Their approach allows users to dynamically change Points of Interest (POIs) that they want to visit - if users don't like certain POIs, they can deselect them and new ones can be suggested. This thesis approaches the problem from a different perspective: evaluating the quality of itineraries. While Basu Roy et al. take a first step by assuming that more POIs covered in a route leads to higher user satisfaction, this is not necessarily true as fewer, more enjoyable points might provide better user experience.
 

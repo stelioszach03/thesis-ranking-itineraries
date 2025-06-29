@@ -2,9 +2,9 @@
 
 [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![NKUA Thesis](https://img.shields.io/badge/NKUA-Master's%20Thesis-green.svg)](https://www.di.uoa.gr/)
+[![NKUA Thesis](https://img.shields.io/badge/NKUA-Bachelor's%20Thesis-green.svg)](https://www.di.uoa.gr/)
 
-This repository contains the complete implementation, evaluation, and documentation for the Master's thesis "Ranking Itineraries: Dynamic Algorithms Meet User Preferences" (Βαθμονόμηση Δρομολογίων: Δυναμικοί Αλγόριθμοι και Προτιμήσεις Χρηστών) at the National and Kapodistrian University of Athens.
+This repository contains the complete implementation, evaluation, and documentation for the Bachelor's thesis "Ranking Itineraries: Dynamic Algorithms Meet User Preferences" (Βαθμονόμηση Δρομολογίων: Δυναμικοί Αλγόριθμοι και Προτιμήσεις Χρηστών) at the National and Kapodistrian University of Athens.
 
 ## 🎯 Overview
 
@@ -177,7 +177,7 @@ While this is a thesis project, contributions for extensions and improvements ar
 If you use this work in your research, please cite:
 
 ```bibtex
-@mastersthesis{zacharioudakis2025ranking,
+@thesis{zacharioudakis2025ranking,
   title={Ranking Itineraries: Dynamic Algorithms Meet User Preferences},
   author={Zacharioudakis, Stelios},
   year={2025},
@@ -193,7 +193,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 🙏 Acknowledgments
 
 - National and Kapodistrian University of Athens, Department of Informatics & Telecommunications
-- Thesis supervisor (to be confirmed)
+- Thesis supervisor: Prof. Dimitrios Gounopoulos
 - 30 user study participants
 - OpenStreetMap and Foursquare for POI data
 
@@ -205,4 +205,4 @@ Project Link: [https://github.com/yourusername/thesis-ranking-itineraries](https
 
 ---
 
-**Note**: This thesis represents 16 ECTS credits, equivalent to two compulsory courses in the NKUA Master's program.
+**Note**: This thesis represents 16 ECTS credits, equivalent to two compulsory courses in the NKUA Bachelor's program.
