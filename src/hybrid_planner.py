@@ -595,8 +595,10 @@ class HybridPlanner:
         uniform_prefs = {cat: 1.0 for cat in set(poi.category for poi in pois)}
         
         # Adjust constraints to force selection of all POIs
+        # Use a very large budget instead of infinity to avoid overflow errors
+        total_cost = sum(poi.entrance_fee for poi in pois)
         routing_constraints = Constraints(
-            budget=float('inf'),  # Ignore budget for routing
+            budget=max(total_cost * 2, 10000),  # Large budget for routing
             max_pois=len(pois),
             min_pois=len(pois),
             max_time_hours=constraints.max_time_hours,

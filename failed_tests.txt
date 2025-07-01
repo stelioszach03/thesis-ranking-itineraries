@@ -1,0 +1,46 @@
+tests/test_astar.py::TestAStarItineraryPlanner::test_basic_planning FAILED [  7%]
+tests/test_astar.py::TestAStarItineraryPlanner::test_no_feasible_solution FAILED [ 13%]
+tests/test_astar.py::TestAStarItineraryPlanner::test_optimal_solution FAILED [ 15%]
+tests/test_greedy.py::TestHeapPrunGreedyPOI::test_heap_pruning FAILED    [ 28%]
+tests/test_greedy.py::TestHeapPrunGreedyPOI::test_performance_comparison FAILED [ 32%]
+tests/test_hybrid.py::TestAlgorithmSelector::test_large_problem_selection FAILED [ 38%]
+tests/test_hybrid.py::TestAlgorithmSelector::test_small_problem_selection FAILED [ 40%]
+tests/test_hybrid.py::TestAlgorithmSelector::test_tight_constraints_selection FAILED [ 42%]
+tests/test_hybrid.py::TestResultCache::test_cache_bounds_checking FAILED [ 44%]
+tests/test_hybrid.py::TestResultCache::test_cache_size_limit FAILED      [ 46%]
+tests/test_hybrid.py::TestResultCache::test_cache_storage_retrieval FAILED [ 48%]
+tests/test_hybrid.py::TestHybridPlanner::test_alternative_generation FAILED [ 50%]
+tests/test_hybrid.py::TestHybridPlanner::test_auto_algorithm_selection FAILED [ 51%]
+tests/test_hybrid.py::TestHybridPlanner::test_caching_efficiency FAILED  [ 53%]
+tests/test_hybrid.py::TestHybridPlanner::test_interactive_feedback FAILED [ 55%]
+tests/test_hybrid.py::TestHybridPlanner::test_specific_algorithm_planning FAILED [ 57%]
+tests/test_hybrid.py::TestHybridPlannerIntegration::test_nyc_scenario FAILED [ 59%]
+tests/test_lpa.py::TestLPANode::test_node_consistency FAILED             [ 61%]
+tests/test_lpa.py::TestLPANode::test_node_creation FAILED                [ 63%]
+tests/test_lpa.py::TestLPAStarPlanner::test_initial_planning FAILED      [ 67%]
+tests/test_metrics.py::TestCompositeUtilityFunctions::test_calculate_all_metrics FAILED [ 92%]
+tests/test_metrics.py::TestCompositeUtilityFunctions::test_edge_cases FAILED [ 96%]
+tests/test_metrics.py::TestCompositeUtilityFunctions::test_time_utilization_rate FAILED [100%]
+FAILED tests/test_astar.py::TestAStarItineraryPlanner::test_basic_planning - ...
+FAILED tests/test_astar.py::TestAStarItineraryPlanner::test_no_feasible_solution
+FAILED tests/test_astar.py::TestAStarItineraryPlanner::test_optimal_solution
+FAILED tests/test_greedy.py::TestHeapPrunGreedyPOI::test_heap_pruning - Asser...
+FAILED tests/test_greedy.py::TestHeapPrunGreedyPOI::test_performance_comparison
+FAILED tests/test_hybrid.py::TestAlgorithmSelector::test_large_problem_selection
+FAILED tests/test_hybrid.py::TestAlgorithmSelector::test_small_problem_selection
+FAILED tests/test_hybrid.py::TestAlgorithmSelector::test_tight_constraints_selection
+FAILED tests/test_hybrid.py::TestResultCache::test_cache_bounds_checking - Ty...
+FAILED tests/test_hybrid.py::TestResultCache::test_cache_size_limit - TypeErr...
+FAILED tests/test_hybrid.py::TestResultCache::test_cache_storage_retrieval - ...
+FAILED tests/test_hybrid.py::TestHybridPlanner::test_alternative_generation
+FAILED tests/test_hybrid.py::TestHybridPlanner::test_auto_algorithm_selection
+FAILED tests/test_hybrid.py::TestHybridPlanner::test_caching_efficiency - Typ...
+FAILED tests/test_hybrid.py::TestHybridPlanner::test_interactive_feedback - T...
+FAILED tests/test_hybrid.py::TestHybridPlanner::test_specific_algorithm_planning
+FAILED tests/test_hybrid.py::TestHybridPlannerIntegration::test_nyc_scenario
+FAILED tests/test_lpa.py::TestLPANode::test_node_consistency - AssertionError...
+FAILED tests/test_lpa.py::TestLPANode::test_node_creation - AssertionError: F...
+FAILED tests/test_lpa.py::TestLPAStarPlanner::test_initial_planning - TypeErr...
+FAILED tests/test_metrics.py::TestCompositeUtilityFunctions::test_calculate_all_metrics
+FAILED tests/test_metrics.py::TestCompositeUtilityFunctions::test_edge_cases
+FAILED tests/test_metrics.py::TestCompositeUtilityFunctions::test_time_utilization_rate

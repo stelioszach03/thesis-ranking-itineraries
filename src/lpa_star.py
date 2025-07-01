@@ -109,8 +109,8 @@ class LPAStarPlanner:
     """
     
     def __init__(self, pois: List[Dict], distance_matrix: Optional[np.ndarray] = None):
-        # POI data
-        self.pois = [self._dict_to_poi(p) for p in pois]
+        # POI data - handle both dict and POI objects
+        self.pois = [self._dict_to_poi(p) if isinstance(p, dict) else p for p in pois]
         self.poi_map = {poi.id: poi for poi in self.pois}
         self.poi_index_map = {poi.id: i for i, poi in enumerate(self.pois)}
         
